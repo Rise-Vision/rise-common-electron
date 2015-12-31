@@ -1,1 +1,1 @@
-# rise-common-electron
+# Rise Common (Electron)
