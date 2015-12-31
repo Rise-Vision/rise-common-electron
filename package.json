@@ -19,7 +19,6 @@
     "simple-mock": "^0.4.1"
   },
   "dependencies": {
-    "rise-logger": "git://github.com/Rise-Vision/rise-logger-electron.git",
     "gunzip-maybe": "^1.2.1",
     "http-proxy-agent": "^1.0.0",
     "https-proxy-agent": "^1.0.0",
