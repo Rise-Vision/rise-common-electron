@@ -2,7 +2,7 @@
   "name": "rise-common-electron",
   "version": "1.0.0",
   "description": "",
-  "main": "platform.js",
+  "main": "index.js",
   "author": "",
   "license": "GPL-3.0",
   "repository": {
@@ -19,7 +19,6 @@
     "simple-mock": "^0.4.1"
   },
   "dependencies": {
-    "rise-logger": "git://github.com/Rise-Vision/rise-logger-electron.git",
     "gunzip-maybe": "^1.2.1",
     "http-proxy-agent": "^1.0.0",
     "https-proxy-agent": "^1.0.0",
