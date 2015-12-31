@@ -19,6 +19,7 @@
     "simple-mock": "^0.4.1"
   },
   "dependencies": {
+    "rise-logger": "git://github.com/Rise-Vision/rise-logger-electron.git",
     "gunzip-maybe": "^1.2.1",
     "http-proxy-agent": "^1.0.0",
     "https-proxy-agent": "^1.0.0",
@@ -30,6 +31,6 @@
     "windows-shortcuts": "git://github.com/Rise-Vision/windows-shortcuts.git"
   },
   "scripts": {
-    "test": "istanbul cover node_modules/mocha/bin/_mocha -- --statements 40 --lines 40 --branches 40 --functions 40 --reporter mocha-junit-reporter --reporter-options mochaFile=test/test-results.xml --recursive test/unit"
+    "test": "istanbul cover node_modules/mocha/bin/_mocha -r ./test/init.js -- --reporter mocha-junit-reporter --reporter-options mochaFile=test/test-results.xml --recursive test/unit"
   }
 }

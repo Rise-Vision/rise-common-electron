@@ -314,15 +314,12 @@ describe("platform", ()=>{
   });
 
   it("does not execute a function on other runs", ()=>{
-    var mockDirName = __dirname.split(path.sep);
-    mockDirName.splice(-3, 2);
-    mockDirName = mockDirName.join(path.sep);
-    mock(platform, "getInstallerDir").returnWith(mockDirName);
+    mock(platform, "isFirstRun").returnWith(false);
 
     return Promise.resolve()
     .then(platform.onFirstRun(()=>{return Promise.resolve(true);}))
     .then((itRan)=> {
-      assert.ok(itRan === undefined);
+      assert.ok(!itRan);
     });
   });
 
