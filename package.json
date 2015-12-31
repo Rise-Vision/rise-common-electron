@@ -2,7 +2,7 @@
   "name": "rise-common-electron",
   "version": "1.0.0",
   "description": "",
-  "main": "platform.js",
+  "main": "index.js",
   "author": "",
   "license": "GPL-3.0",
   "repository": {
