@@ -206,7 +206,7 @@ module.exports = {
   },
   extractZipTo(source, destination, progressCallback) {
     function progress(fileStream, header) {
-      return fileStream.pipe(new stream.Transform({
+      var tx = new stream.Transform({
         transform(chunk, enc, next) {
           progressCallback(chunk.length, header.name, header.size);
           this.push(chunk);
@@ -215,7 +215,10 @@ module.exports = {
         flush(done) {
           done();
         }
-      }));
+      });
+
+      tx.destroy = function() {};
+      return fileStream.pipe(tx);
     }
 
     return new Promise((resolve, reject)=>{
