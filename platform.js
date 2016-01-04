@@ -315,5 +315,15 @@ module.exports = {
         }
       });        
     });
+  },
+  parsePropertyList(list) {
+    var result = {};
+    list.split("\n").forEach((line)=>{
+      if (line.indexOf("=") < 0) {return;}
+      var vals = line.trim().split("=");
+      result[vals[0]] = vals[1];
+    });
+
+    return result;
   }
 };

@@ -341,4 +341,13 @@ describe("platform", ()=>{
       assert.equal(err, "error");
     });
   });
+
+  it("parses a property list (text form) into a map", ()=>{
+    var text = "property1=value1\nproperty2=value2";
+    var propList = platform.parsePropertyList(text);
+
+    assert.equal(propList.property1, "value1");
+    assert.equal(propList.property2, "value2");
+    assert(!propList.property3);
+  });
 });
