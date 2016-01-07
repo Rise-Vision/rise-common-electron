@@ -8,7 +8,8 @@ ncp = require("ncp"),
 rimraf = require("rimraf"),
 gunzip = require("gunzip-maybe"),
 tar = require("tar-fs"),
-ws = require("windows-shortcuts");
+ws = require("windows-shortcuts"),
+tempDir = "rvplayer-" + new Date().getTime();
 
 module.exports = {
   getCoreUrl() {
@@ -36,7 +37,7 @@ module.exports = {
     return path.join(module.exports.getHomeDir(), "rvplayer");
   },
   getTempDir() {
-    return os.tmpdir();
+    return path.join(os.tmpdir(), tempDir);
   },
   getCwd() {
     return process.cwd();
