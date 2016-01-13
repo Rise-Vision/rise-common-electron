@@ -304,7 +304,7 @@ describe("platform", ()=>{
   });
 
   it("executes a function that returns a promise on first run", ()=>{
-    mock(platform, "getInstallerDir").returnWith("not current directory");
+    mock(platform, "isFirstRun").returnWith(true);
 
     return Promise.resolve()
     .then(platform.onFirstRun(()=>{return Promise.resolve(true);}))

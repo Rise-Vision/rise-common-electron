@@ -15,7 +15,6 @@ describe("launcher", ()=>{
     mock(externalLogger, "log").returnWith();
     mock(fs, "appendFileSync").returnWith();
     mock(fs, "mkdirSync").returnWith();
-    mock(fs, "lstatSync").returnWith();
     
     log = require("../../logger.js")(externalLogger, "installDir");
   });
