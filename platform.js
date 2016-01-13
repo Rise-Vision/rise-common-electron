@@ -296,7 +296,12 @@ module.exports = {
     rimraf(path, cb);
   },
   isFirstRun() {
-    return __dirname !== module.exports.getInstallerDir();
+    try {
+      fs.statSync(path.join(module.exports.getInstallerDir(), "version.json"));
+      return true;
+    }catch (e) {
+      return false;
+    }
   },
   onFirstRun(whatToDo) {
     if (module.exports.isFirstRun()) {
