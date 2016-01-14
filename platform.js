@@ -331,5 +331,14 @@ module.exports = {
     });
 
     return result;
+  },
+  reboot() {
+    var command = "shutdown -r -c Rise Player needs to reboot computer."
+
+    if(!module.exports.isWindows()) {
+      command = "bash -c dbus-send --system --print-reply --dest=org.freedesktop.login1 /org/freedesktop/login1 \"org.freedesktop.login1.Manager.Reboot\" boolean:true";
+    }
+
+    return module.exports.spawn(command);
   }
 };

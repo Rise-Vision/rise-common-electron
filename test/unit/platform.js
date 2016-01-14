@@ -350,4 +350,24 @@ describe("platform", ()=>{
     assert.equal(propList.property2, "value2");
     assert(!propList.property3);
   });
+
+  it("reboots a Linux box", ()=>{
+    mock(platform, "isWindows").returnWith(false);
+    mock(platform, "spawn").resolveWith();
+
+    return platform.reboot().then(()=>{
+      assert(platform.spawn.called);
+      assert(platform.spawn.lastCall.args[0].indexOf("dbus-send") >= 0);
+    });
+  });
+
+  it("reboots a Windows box", ()=>{
+    mock(platform, "isWindows").returnWith(true);
+    mock(platform, "spawn").resolveWith();
+
+    return platform.reboot().then(()=>{
+      assert(platform.spawn.called);
+      assert(platform.spawn.lastCall.args[0].indexOf("shutdown") >= 0);
+    });
+  });
 });
