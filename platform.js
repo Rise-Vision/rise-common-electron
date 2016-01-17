@@ -42,6 +42,9 @@ module.exports = {
   getCwd() {
     return process.cwd();
   },
+  getRunningPlatformDir() {
+    return __dirname;
+  },
   isDevMode() {
     var currPath = module.exports.getCwd().split(path.sep);
 
