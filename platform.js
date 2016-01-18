@@ -197,6 +197,7 @@ module.exports = {
     });
   },
   copyFolderRecursive(source, target) {
+    log.debug(`copying ${source} to ${target}`);
     return new Promise((resolve, reject)=>{
       ncp.ncp(source, target, { clobber: true }, (err)=>{
         if(!err) {
