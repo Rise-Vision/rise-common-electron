@@ -131,7 +131,14 @@ module.exports = {
       return module.exports.spawn("taskkill /f /im javaw.exe");
     }
     else {
-      return module.exports.spawn("pkill -f " + module.exports.getJavaExecutablePath() + "\n");
+      return module.exports.spawn("pkill -f " + module.exports.getJavaExecutablePath());
+    }
+  },
+  killInstaller() {
+    if (module.exports.isWindows()) {
+     return module.exports.spawn("taskkill /f /im installer.exe");
+    } else {
+      return module.exports.spawn("pkill -f " + module.exports.getInstallDir() + "/Installer");
     }
   },
   killChromium() {
@@ -337,7 +344,7 @@ module.exports = {
     return result;
   },
   reboot() {
-    var command = "shutdown -r -c Rise Player needs to reboot computer."
+    var command = "shutdown -r -c Rise Player needs to reboot computer.";
 
     if(!module.exports.isWindows()) {
       command = "bash -c dbus-send --system --print-reply --dest=org.freedesktop.login1 /org/freedesktop/login1 \"org.freedesktop.login1.Manager.Reboot\" boolean:true";
