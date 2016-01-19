@@ -370,4 +370,32 @@ describe("platform", ()=>{
       assert(platform.spawn.lastCall.args[0].indexOf("shutdown") >= 0);
     });
   });
+
+  it("returns the correct Java Path on Windows", ()=>{
+    mock(platform, "getInstallDir").returnWith("test");
+    mock(platform, "isWindows").returnWith(true);
+
+    assert.equal(platform.getJavaExecutablePath(), path.join("test", "JRE", "bin", "javaw.exe"));
+  });
+
+  it("returns the correct Java Path on Linux", ()=>{
+    mock(platform, "getInstallDir").returnWith("test");
+    mock(platform, "isWindows").returnWith(false);
+
+    assert.equal(platform.getJavaExecutablePath(), path.join("test", "jre", "bin", "java"));
+  });
+
+  it("returns the correct Browser Path on Windows", ()=>{
+    mock(platform, "getInstallDir").returnWith("test");
+    mock(platform, "isWindows").returnWith(true);
+
+    assert.equal(platform.getBrowserExecutablePath(), path.join("test", "chromium", "chrome.exe"));
+  });
+
+  it("returns the correct Browser Path on Linux", ()=>{
+    mock(platform, "getInstallDir").returnWith("test");
+    mock(platform, "isWindows").returnWith(false);
+
+    assert.equal(platform.getBrowserExecutablePath(), path.join("test", "chrome-linux", "chrome"));
+  });
 });

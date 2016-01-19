@@ -50,9 +50,16 @@ module.exports = {
 
     return currPath.length < 2 || currPath[currPath.length - 2] !== "resources";
   },
+  getBrowserExecutablePath() {
+    if (module.exports.isWindows()) {
+      return path.join(module.exports.getInstallDir(), "chromium", "chrome.exe");
+    } else {
+      return path.join(module.exports.getInstallDir(), "chrome-linux", "chrome");
+    }
+  },
   getJavaExecutablePath() {
     if (module.exports.isWindows()) {
-      return path.join(module.exports.getInstallDir(), "JRE", "bin", "java.exe");
+      return path.join(module.exports.getInstallDir(), "JRE", "bin", "javaw.exe");
     } else {
       return path.join(module.exports.getInstallDir(), "jre", "bin", "java");
     }
