@@ -6,12 +6,15 @@ os = require("os"),
 fs = require(process.versions.electron ? "original-fs" : "fs"),
 ncp = require("ncp"),
 rimraf = require("rimraf"),
+net = require("net"),
 gunzip = require("gunzip-maybe"),
 tar = require("tar-fs"),
 ws = require("windows-shortcuts"),
-tempDir = "rvplayer-" + new Date().getTime();
+tempDir = "rvplayer-" + new Date().getTime(),
+componentsInfo = {};
 
 module.exports = {
+  componentsInfo,
   getCoreUrl() {
     return "https://rvaserver2.appspot.com";
   },
@@ -358,5 +361,19 @@ module.exports = {
     }
 
     return module.exports.spawn(command);
+  },
+  getNetworkIP() {
+    return new Promise((resolve, reject)=>{
+      var socket = net.createConnection(80, "www.google.com");
+
+      socket.on("connect", function() {
+        var localNetworkIP = socket.address().address;
+        socket.end();
+        resolve(localNetworkIP);
+      });
+      socket.on("error", function(e) {
+        reject(e);
+      });    
+    });
   }
 };
