@@ -10,11 +10,9 @@ net = require("net"),
 gunzip = require("gunzip-maybe"),
 tar = require("tar-fs"),
 ws = require("windows-shortcuts"),
-tempDir = "rvplayer-" + new Date().getTime(),
-componentsInfo = {};
+tempDir = "rvplayer-" + new Date().getTime();
 
 module.exports = {
-  componentsInfo,
   getCoreUrl() {
     return "https://rvaserver2.appspot.com";
   },
