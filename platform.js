@@ -279,6 +279,18 @@ module.exports = {
       }
     });
   },
+  mkdirRecursively(path) {
+    return new Promise((resolve, reject)=>{
+      module.exports.callMkdirp(path, (err)=>{
+        if (!err) {
+          resolve();
+        } else {
+          log.error("Error creating directory", "Error creating directory: " + path);
+          reject({ message: "Error creating directory: " + path, userFriendlyMessage: "Error creating directory: " + path, error: err });
+        }
+      });
+    });
+  },
   renameFile(oldName, newName) {
     return new Promise((resolve, reject)=>{
       fs.rename(oldName, newName, (err)=>{
@@ -305,6 +317,9 @@ module.exports = {
   },
   callRimraf(path, cb) {
     rimraf(path, cb);
+  },
+  callMkdirp(path, cb) {
+    mkdirp(path, cb);
   },
   isFirstRun() {
     try {

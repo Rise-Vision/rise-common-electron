@@ -268,6 +268,26 @@ describe("platform", ()=>{
     });
   });
 
+  it("creates a folder recursively", ()=>{
+    mock(platform, "callMkdirp").callbackWith(null);
+
+    return platform.mkdirRecursively("folder1/folder2").then((err)=>{
+      assert(platform.callMkdirp.called);
+      assert.equal(platform.callMkdirp.lastCall.args[0], "folder1/folder2");
+      assert(!err);
+    });
+  });
+
+  it("fails to create a folder recursively", ()=>{
+    mock(platform, "callMkdirp").callbackWith("error");
+
+    return platform.mkdirRecursively("folder1/folder2").catch((err)=>{
+      assert(platform.callMkdirp.called);
+      assert.equal(platform.callMkdirp.lastCall.args[0], "folder1/folder2");
+      assert.equal(err.error, "error");
+    });
+  });
+
   it("renames a file", ()=>{
     mock(fs, "rename").callbackWith(null);
 
