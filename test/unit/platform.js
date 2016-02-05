@@ -130,6 +130,46 @@ describe("platform", ()=>{
     });
   });
 
+  it("kills explorer.exe on Windows 10", ()=>{
+    mock(platform, "isWindows").returnWith(true);
+    mock(platform, "spawn").resolveWith();
+    mock(platform, "getWindowsVersion").returnWith("10");
+
+    return platform.killExplorer().then(()=>{
+      assert(platform.spawn.called);
+      assert(platform.spawn.lastCall.args[0].indexOf("explorer.exe") >= 0);
+    });
+  });
+
+  it("does not kill explorer.exe on Windows 7", ()=>{
+    mock(platform, "isWindows").returnWith(true);
+    mock(platform, "spawn").resolveWith();
+    mock(platform, "getWindowsVersion").returnWith("7");
+
+    return platform.killExplorer().then(()=>{
+      assert(!platform.spawn.called);
+    });
+  });
+
+  it("does not attempt to kill explorer.exe on Linux", ()=>{
+    mock(platform, "isWindows").returnWith(false);
+    mock(platform, "spawn").resolveWith();
+
+    return platform.killExplorer().then(()=>{
+      assert(!platform.spawn.called);
+    });
+  });
+
+  it("kills Chromium on Linux", ()=>{
+    mock(platform, "isWindows").returnWith(false);
+    mock(platform, "spawn").resolveWith();
+
+    return platform.killChromium().then(()=>{
+      assert(platform.spawn.called);
+      assert(platform.spawn.lastCall.args[0].indexOf("chrome-linux") >= 0);
+    });
+  });
+
   it("reads a text file", ()=>{
     mock(fs, "readFile").callbackWith(null, "text");
 
