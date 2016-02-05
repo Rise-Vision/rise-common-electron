@@ -3,8 +3,7 @@ stream = require("stream"),
 path = require("path"),
 mkdirp = require("mkdirp"),
 os = require("os"),
-fs = require(process.versions.electron ? "original-fs" : "fs"),
-ncp = require("ncp"),
+fs = require("fs-extra"),
 rimraf = require("rimraf"),
 gunzip = require("gunzip-maybe"),
 tar = require("tar-fs"),
@@ -206,7 +205,7 @@ module.exports = {
   copyFolderRecursive(source, target) {
     log.debug(`copying ${source} to ${target}`);
     return new Promise((resolve, reject)=>{
-      ncp.ncp(source, target, { clobber: true }, (err)=>{
+      fs.copy(source, target, { clobber: true }, (err)=>{
         if(!err) {
           resolve();
         }
@@ -345,7 +344,7 @@ module.exports = {
         else {
           reject(err);
         }
-      });        
+      });
     });
   },
   parsePropertyList(list) {
