@@ -2,8 +2,7 @@ var platform = require("../../platform.js"),
 childProcess = require("child_process"),
 os = require("os"),
 path = require("path"),
-ncp = require("ncp"),
-fs = require("fs"),
+fs = require("fs-extra"),
 ws = require("windows-shortcuts"),
 assert = require("assert"),
 simpleMock = require("simple-mock"),
@@ -12,7 +11,7 @@ mock = require("simple-mock").mock;
 global.messages = {};
 describe("platform", ()=>{
   beforeEach("setup mocks", ()=>{
-    
+
   });
 
   afterEach("clean mocks", ()=>{
@@ -65,13 +64,13 @@ describe("platform", ()=>{
     mock(platform, "getCwd").returnWith(path.join("test"));
 
     assert(platform.isDevMode());
-  });  
+  });
 
   it("validates application is not running in devMode", ()=>{
     mock(platform, "getCwd").returnWith(path.join("test", "resources", "app"));
 
     assert(!platform.isDevMode());
-  });  
+  });
 
   it("waits for 100ms to resolve the promise", ()=>{
     var time0 = new Date().getTime();
@@ -196,19 +195,19 @@ describe("platform", ()=>{
   });
 
   it("copies folder recursively", ()=>{
-    mock(ncp, "ncp").callbackWith(null);
+    mock(fs, "copy").callbackWith(null);
 
     return platform.copyFolderRecursive("folder1", "folder2").then((err)=>{
-      assert(ncp.ncp.called);
+      assert(fs.copy.called);
       assert(!err);
     });
   });
 
   it("fails to copy folder recursively", ()=>{
-    mock(ncp, "ncp").callbackWith("error");
+    mock(fs, "copy").callbackWith("error");
 
     return platform.copyFolderRecursive("folder1", "folder2").catch((err)=>{
-      assert(ncp.ncp.called);
+      assert(fs.copy.called);
       assert.equal(err, "error");
     });
   });
