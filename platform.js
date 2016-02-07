@@ -322,10 +322,10 @@ module.exports = {
   },
   isFirstRun() {
     try {
-      fs.statSync(path.join(module.exports.getInstallerDir(), "version.json"));
-      return true;
-    }catch (e) {
+      fs.statSync(module.exports.getInstallerDir());
       return false;
+    }catch (e) {
+      return true;
     }
   },
   onFirstRun(whatToDo) {
