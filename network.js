@@ -52,7 +52,7 @@ module.exports = {
     downloadStats[url] = {tries: 0, bytesExpected: 0, bytesReceived: 0};
 
     function tryDownload(resolve, reject) {
-      var tempPath = path.join(platform.getTempDir(), urlParse(url).pathname.split(path.sep).pop()),
+      var tempPath = path.join(platform.getTempDir(), urlParse(url).pathname.split("/").pop()),
       file = fs.createWriteStream(tempPath);
 
       downloadStats[url].tries += 1;
