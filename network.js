@@ -115,7 +115,10 @@ module.exports = {
       });
     }
 
-    return new Promise(tryDownload);
+    return new Promise((resolve, reject)=>{
+      setTimeout(()=>{reject({ message: "Request timed out", error: url })}, 1000 * 60 * 20);
+      tryDownload(resolve, reject);
+    });
   },
   registerObserver(fn) {
     observers.push(fn);
