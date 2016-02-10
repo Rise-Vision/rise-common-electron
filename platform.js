@@ -135,7 +135,7 @@ module.exports = {
   },
   killInstaller() {
     if (module.exports.isWindows()) {
-     return module.exports.spawn("taskkill /f /im installer.exe");
+      return module.exports.spawn("taskkill /f /im installer.exe");
     } else {
       return module.exports.spawn("pkill -f " + module.exports.getInstallDir() + "/Installer");
     }
@@ -146,6 +146,32 @@ module.exports = {
     }
     else {
       return module.exports.spawn("pkill -f " + path.join(module.exports.getInstallDir(), "chrome-linux") + "\n");
+    }
+  },
+  killExplorer() {
+    if (module.exports.isWindows() && module.exports.getWindowsVersion() !== "7") {
+      return module.exports.spawn("taskkill /f /im explorer.exe");
+    } else {
+      return Promise.resolve();
+    }
+  },
+  getWindowsVersion() {
+    var release = os.release();
+
+    if(release.startsWith("6.0")) {
+      return "Vista";
+    }
+    else if(release.startsWith("6.1")) {
+      return "7";
+    }
+    else if(release.startsWith("6.2")) {
+      return "8";
+    }
+    else if(release.startsWith("6.3")) {
+      return "8.1";
+    }
+    else if(release.startsWith("10.0")) {
+      return "10";
     }
   },
   readTextFile(path) {
