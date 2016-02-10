@@ -318,14 +318,15 @@ module.exports = {
   },
   renameFile(oldName, newName) {
     return new Promise((resolve, reject)=>{
-      fs.rename(oldName, newName, (err)=>{
-        if(!err) {
-          resolve();
-        }
-        else {
-          reject({ message: "Error renaming file", error: err });
-        }
-      });
+      try {
+        fs.copySync(oldName, newName);
+        fs.removeSync(oldName);
+        resolve();
+      }
+      catch (err) {
+        var message = "Error renaming " + oldName + " to " + newName;
+        reject({ message: message, userFriendlyMessage: message, error: err });
+      }
     });
   },
   deleteRecursively(path) {
