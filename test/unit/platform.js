@@ -328,19 +328,37 @@ describe("platform", ()=>{
   });
 
   it("renames a file", ()=>{
-    mock(fs, "rename").callbackWith(null);
+    mock(fs, "copySync").returnWith();
+    mock(fs, "removeSync").returnWith();
 
     return platform.renameFile("file.txt", "newname.txt").then(()=>{
-      assert(fs.rename.called);
+      assert(fs.copySync.called);
+      assert(fs.removeSync.called);
+      assert.equal(fs.copySync.lastCall.args[0], "file.txt");
+      assert.equal(fs.copySync.lastCall.args[1], "newname.txt");
+      assert.equal(fs.removeSync.lastCall.args[0], "file.txt");
     });
   });
 
-  it("fails to rename a file", ()=>{
-    mock(fs, "rename").callbackWith("rename error");
+  it("fails to rename a file in the copy step", ()=>{
+    mock(fs, "copySync").throwWith("copy error");
+    mock(fs, "removeSync").returnWith();
 
     return platform.renameFile("file.txt", "newname.txt").catch((err)=>{
-      assert(fs.rename.called);
-      assert.equal(err.error, "rename error");
+      assert(fs.copySync.called);
+      assert(!fs.removeSync.called);
+      assert.equal(err.error, "copy error");
+    });
+  });
+
+  it("fails to rename a file in the remove step", ()=>{
+    mock(fs, "copySync").returnWith();
+    mock(fs, "removeSync").throwWith("delete error");
+
+    return platform.renameFile("file.txt", "newname.txt").catch((err)=>{
+      assert(fs.copySync.called);
+      assert(fs.removeSync.called);
+      assert.equal(err.error, "delete error");
     });
   });
 
