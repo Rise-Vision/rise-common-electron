@@ -15,6 +15,8 @@ describe("Network", function() {
   var fileName = "test-file.txt",
   filePath = path.resolve(__dirname, fileName);
 
+  this.timeout(9000);
+
   before("setup servers", ()=>{
     return startServer().then(startRedirector);
   });

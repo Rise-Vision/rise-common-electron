@@ -13,6 +13,8 @@ downloadStats = {},
 observers = [],
 maxRetries = 10;
 
+const downloadTimeout = 1000 * 60 * 20;
+
 proxy.observe(setNodeHttpAgent);
 function setNodeHttpAgent(fields) {
   log.debug("Setting proxy to " + fields.href);
@@ -60,7 +62,7 @@ module.exports = {
 
       setTimeout(()=>{
         reject({ message: "Request timed out", error: originalUrl });
-      }, 1000 * 60 * 20);
+      }, downloadTimeout);
 
       tryDownload(originalUrl);
     });
