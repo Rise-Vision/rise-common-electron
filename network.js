@@ -6,7 +6,7 @@ httpsProxyAgent = require("https-proxy-agent"),
 proxy = require("./proxy.js"),
 fetchOptions = {},
 javaProxyArgs = [],
-urlParse = require("url").parse,
+url = require("url"),
 path = require("path"),
 fs = require("fs"),
 downloadStats = {},
@@ -48,45 +48,71 @@ module.exports = {
   callFetch(dest, opts) {
     return fetch(dest, opts);
   },
-  downloadFile(url) {
-    downloadStats[url] = {tries: 0, bytesExpected: 0, bytesReceived: 0};
+  downloadFile(originalUrl) {
+    var resolve, reject,
+    savePath = path.join(platform.getTempDir(), url.parse(originalUrl).pathname.split("/").pop());
 
-    function tryDownload(resolve, reject) {
-      var tempPath = path.join(platform.getTempDir(), urlParse(url).pathname.split("/").pop()),
-      file = fs.createWriteStream(tempPath);
+    downloadStats[originalUrl] = {tries: 0, bytesExpected: 0, bytesReceived: 0};
 
-      downloadStats[url].tries += 1;
+    return new Promise((res, rej)=>{
+      resolve = res;
+      reject = rej;
+
+      setTimeout(()=>{
+        reject({ message: "Request timed out", error: originalUrl });
+      }, 1000 * 60 * 20);
+
+      tryDownload(originalUrl);
+    });
+
+    function tryDownload(downloadUrl) {
+      var file = fs.createWriteStream(savePath);
+
+      downloadStats[originalUrl].tries += 1;
 
       file.on("error", (err)=>{
         reject({ message: "Error creating temporary download file", error: err });
       });
 
-      log.debug("Downloading " + url + " try " + downloadStats[url].tries);
+      log.debug("Downloading " + originalUrl + " try " + downloadStats[originalUrl].tries);
 
-      var req = http.get(url, (res)=>{
-        if(res.statusCode === 404) {
-          reject({ message: "File not found", error: res.statusCode });
-        }
-        else if(res.statusCode < 200 || res.statusCode >= 300) {
+      var req = http.get(downloadUrl, (res)=>{
+        if (isRedirect(res.statusCode)) {
+          if (downloadStats[originalUrl].tries === maxRetries) {
+            reject({message: "Too many download attempts"});
+            return;
+          }
+          
+          if (!res.headers.location) {
+            reject({message: "Missing location header at " + originalUrl});
+            return;
+          }
+
+          tryDownload(url.resolve(downloadUrl, res.headers.location));
+          return;
+        } else if(res.statusCode < 200 || res.statusCode >= 300) {
           reject({ message: "Error downloading file", error: res.statusCode });
+          return;
         }
 
-        downloadStats[url].bytesExpected = Number(res.headers["content-length"]);
+        downloadStats[originalUrl].bytesExpected = Number(res.headers["content-length"]);
+        downloadStats[originalUrl].bytesReceived = 0;
+
         res.on("data", (data)=>{
-          downloadStats[url].bytesReceived += data.length;
+          downloadStats[originalUrl].bytesReceived += data.length;
           file.write(data);
           observers.forEach((observer)=>{observer(downloadStats);});
         });
         res.on("end", ()=>{
           file.end();
-          resolve(tempPath);
+          resolve(savePath);
         });
         res.on("error", function(e) {
           file.end();
-          if (downloadStats[url].tries === maxRetries) {
+          if (downloadStats[originalUrl].tries === maxRetries) {
             reject({ message: "Response error downloading file" + e.message, error: e });
           } else {
-            tryDownload(resolve, reject);
+            tryDownload(downloadUrl);
           }
         });
       });
@@ -94,12 +120,12 @@ module.exports = {
       req.on("socket", function (socket) {
         socket.setTimeout(2000);  
         socket.on("timeout", function() {
-          if(!downloadStats[url].bytesReceived) {
+          if(!downloadStats[originalUrl].bytesReceived) {
             req.abort();
-            if (downloadStats[url].tries === maxRetries) {
-              reject({ message: "Request timed out", error: url });
+            if (downloadStats[originalUrl].tries === maxRetries) {
+              reject({ message: "Request timed out", error: originalUrl });
             } else {
-              tryDownload(resolve, reject);
+              tryDownload(downloadUrl);
             }
           }
         });
@@ -107,18 +133,17 @@ module.exports = {
 
       req.on("error", function(e) {
         file.end();
-        if (downloadStats[url].tries === maxRetries) {
+        if (downloadStats[originalUrl].tries === maxRetries) {
           reject({ message: "Request error downloading file" + e.message, error: e });
         } else {
-          tryDownload(resolve, reject);
+          tryDownload(downloadUrl);
         }
       });
-    }
 
-    return new Promise((resolve, reject)=>{
-      setTimeout(()=>{reject({ message: "Request timed out", error: url })}, 1000 * 60 * 20);
-      tryDownload(resolve, reject);
-    });
+      function isRedirect(code) {
+        return code === 301 || code === 302 || code === 303 || code === 307 || code === 308;
+      }
+    }
   },
   registerObserver(fn) {
     observers.push(fn);
