@@ -130,7 +130,7 @@ module.exports = {
       return module.exports.spawn("taskkill /f /im javaw.exe");
     }
     else {
-      return module.exports.spawn("pkill -f 'Rise.*jar'");
+      return module.exports.spawn("pkill -f Rise.*jar");
     }
   },
   killInstaller() {
