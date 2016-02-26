@@ -44,6 +44,9 @@ module.exports = {
   getRunningPlatformDir() {
     return __dirname;
   },
+  isRoot() {
+    return process.getuid && process.getuid() === 0;
+  },
   isDevMode() {
     var currPath = module.exports.getCwd().split(path.sep);
 
