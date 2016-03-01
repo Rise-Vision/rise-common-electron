@@ -189,18 +189,13 @@ module.exports = {
       });
     });
   },
-  readTextFileSync(path, logError) {
+  readTextFileSync(path) {
     var stringContents = "";
 
     try {
       stringContents = fs.readFileSync(path, "utf8");
     } catch (e) {
-      if(logError) {
-        log.error("Could not read file " + path + " " + require("util").inspect(e), messages.fileReadError);
-      }
-      else {
-        log.file("Could not read file " + path + " " + require("util").inspect(e));
-      }
+      log.external("file read error", path + " " + require("util").inspect(e));
     }
 
     return stringContents;
@@ -212,7 +207,6 @@ module.exports = {
         if (!err) {
           resolve();
         } else {
-          log.error("Error writing file", messages.fileWriteError);
           reject({ message: "Error writing file", error: err });
         }
       });
@@ -224,7 +218,6 @@ module.exports = {
             resolve();
           }
           else {
-            log.error("Error writing file", messages.fileWriteError);
             reject({ message: "Error writing file", error: err });
           }
         });
@@ -313,7 +306,6 @@ module.exports = {
         if (!err) {
           resolve();
         } else {
-          log.error("Error creating directory", "Error creating directory: " + path);
           reject({ message: "Error creating directory: " + path, userFriendlyMessage: "Error creating directory: " + path, error: err });
         }
       });
