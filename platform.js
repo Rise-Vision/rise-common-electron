@@ -195,7 +195,7 @@ module.exports = {
     try {
       stringContents = fs.readFileSync(path, "utf8");
     } catch (e) {
-      log.external("file read error", path + " " + require("util").inspect(e));
+      log.file("Could not read file " + path + " " + require("util").inspect(e));
     }
 
     return stringContents;

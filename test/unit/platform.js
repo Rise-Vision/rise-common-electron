@@ -203,7 +203,7 @@ describe("platform", ()=>{
 
     assert.equal(platform.readTextFileSync("file.txt"), "");
     assert(fs.readFileSync.called);
-    assert(log.external.called);
+    assert(log.file.called);
     assert(!log.error.called);
   });
 
