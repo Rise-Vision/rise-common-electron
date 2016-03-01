@@ -74,6 +74,9 @@ module.exports = {
   getOldInstallerPath() {
     return path.join(module.exports.getInstallDir(), module.exports.getOldInstallerName());
   },
+  getUncaughtErrorFileName() {
+    return path.join(module.exports.getInstallDir(), "uncaught-exception.json");
+  },
   getProgramsMenuPath() {
     if(module.exports.isWindows()) {
       return path.join(process.env.APPDATA, "Microsoft", "Windows", "Start Menu", "Programs");
@@ -223,6 +226,16 @@ module.exports = {
         });
       });
     });
+  },
+  writeTextFileSync(filePath, data) {
+    log.debug("writing sync " + filePath);
+
+    try {
+      fs.writeFileSync(filePath, data);
+    }
+    catch (err) {
+      log.debug(`Error writing file sync ${err}`);
+    }
   },
   copyFolderRecursive(source, target) {
     log.debug(`copying ${source} to ${target}`);

@@ -234,6 +234,20 @@ describe("platform", ()=>{
     });
   });
 
+  it("writes a text file synchronously", ()=>{
+    mock(fs, "writeFileSync").returnWith();
+
+    platform.writeTextFileSync("file.txt", "text");
+    assert(fs.writeFileSync.called);
+  });
+
+  it("does not throw when it fails to write a text file synchronously", ()=>{
+    mock(fs, "writeFileSync").throwWith("write error");
+
+    platform.writeTextFileSync("file.txt", "text");
+    assert(fs.writeFileSync.called);
+  });
+
   it("copies folder recursively", ()=>{
     mock(fs, "copy").callbackWith(null);
 
