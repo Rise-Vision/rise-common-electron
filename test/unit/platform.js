@@ -60,18 +60,6 @@ describe("platform", ()=>{
     assert(os.tmpdir.called);
   });
 
-  it("validates application is running in devMode", ()=>{
-    mock(platform, "getCwd").returnWith(path.join("test"));
-
-    assert(platform.isDevMode());
-  });
-
-  it("validates application is not running in devMode", ()=>{
-    mock(platform, "getCwd").returnWith(path.join("test", "resources", "app"));
-
-    assert(!platform.isDevMode());
-  });
-
   it("waits for 100ms to resolve the promise", ()=>{
     var time0 = new Date().getTime();
 
