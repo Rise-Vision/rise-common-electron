@@ -4,7 +4,6 @@ path = require("path"),
 mkdirp = require("mkdirp"),
 os = require("os"),
 fs = require("fs-extra"),
-rimraf = require("rimraf"),
 gunzip = require("gunzip-maybe"),
 tar = require("tar-fs"),
 ws = require("windows-shortcuts"),
@@ -339,18 +338,21 @@ module.exports = {
   },
   deleteRecursively(path) {
     return new Promise((resolve, reject)=>{
-      module.exports.callRimraf(path, (err)=>{
-        if(!err) {
-          resolve();
-        }
-        else {
-          reject({ message: "Error recursively deleting path", error: err });
-        }
-      });
+      if(!module.exports.fileExists(path)) {
+        resolve();
+      }
+      else {
+        fs.remove(path, (err)=>{
+          if(!err) {
+            resolve();
+          }
+          else {
+            var message = "Error recursively deleting path";
+            reject({ message: message, userFriendlyMessage: message, error: err });
+          }
+        });
+      }
     });
-  },
-  callRimraf(path, cb) {
-    rimraf(path, cb);
   },
   callMkdirp(path, cb) {
     mkdirp(path, cb);
