@@ -5,6 +5,7 @@ mkdirp = require("mkdirp"),
 os = require("os"),
 fs = require("fs-extra"),
 rimraf = require("rimraf"),
+net = require("net"),
 gunzip = require("gunzip-maybe"),
 tar = require("tar-fs"),
 ws = require("windows-shortcuts"),
@@ -52,9 +53,16 @@ module.exports = {
 
     return currPath.length < 2 || currPath[currPath.length - 2] !== "resources";
   },
+  getBrowserExecutablePath() {
+    if (module.exports.isWindows()) {
+      return path.join(module.exports.getInstallDir(), "chromium", "chrome.exe");
+    } else {
+      return path.join(module.exports.getInstallDir(), "chrome-linux", "chrome");
+    }
+  },
   getJavaExecutablePath() {
     if (module.exports.isWindows()) {
-      return path.join(module.exports.getInstallDir(), "JRE", "bin", "java.exe");
+      return path.join(module.exports.getInstallDir(), "JRE", "bin", "javaw.exe");
     } else {
       return path.join(module.exports.getInstallDir(), "jre", "bin", "java");
     }
@@ -400,5 +408,19 @@ module.exports = {
     }
 
     return module.exports.spawn(command);
+  },
+  getNetworkIP() {
+    return new Promise((resolve, reject)=>{
+      var socket = net.createConnection(80, "www.google.com");
+
+      socket.on("connect", function() {
+        var localNetworkIP = socket.address().address;
+        socket.end();
+        resolve(localNetworkIP);
+      });
+      socket.on("error", function(e) {
+        reject(e);
+      });    
+    });
   }
 };
