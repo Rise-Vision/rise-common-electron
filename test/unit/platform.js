@@ -365,20 +365,35 @@ describe("platform", ()=>{
   });
 
   it("deletes a folder recursively", ()=>{
-    mock(platform, "callRimraf").callbackWith(null);
+    mock(fs, "remove").callbackWith();
+    mock(platform, "fileExists").returnWith(true);
 
     return platform.deleteRecursively("folder1").then((err)=>{
-      assert(platform.callRimraf.called);
+      assert(platform.fileExists.called);
+      assert(fs.remove.called);
+      assert(!err);
+    });
+  });
+
+  it("deletes a non existing folder recursively", ()=>{
+    mock(fs, "remove").callbackWith();
+    mock(platform, "fileExists").returnWith(false);
+
+    return platform.deleteRecursively("folder1").then((err)=>{
+      assert(platform.fileExists.called);
+      assert(!fs.remove.called);
       assert(!err);
     });
   });
 
   it("fails to copy folder recursively", ()=>{
-    mock(platform, "callRimraf").callbackWith("error");
+    mock(fs, "remove").callbackWith("error removing");
+    mock(platform, "fileExists").returnWith(true);
 
     return platform.deleteRecursively("folder1").catch((err)=>{
-      assert(platform.callRimraf.called);
-      assert.equal(err.error, "error");
+      assert(platform.fileExists.called);
+      assert(fs.remove.called);
+      assert.equal(err.error, "error removing");
     });
   });
 
