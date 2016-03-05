@@ -345,7 +345,7 @@ module.exports = {
     });
   },
   callRimraf(path, cb) {
-    rimraf(path, cb);
+    rimraf(path, fs, cb);
   },
   callMkdirp(path, cb) {
     mkdirp(path, cb);
