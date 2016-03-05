@@ -47,11 +47,6 @@ module.exports = {
   isRoot() {
     return process.getuid && process.getuid() === 0;
   },
-  isDevMode() {
-    var currPath = module.exports.getCwd().split(path.sep);
-
-    return currPath.length < 2 || currPath[currPath.length - 2] !== "resources";
-  },
   getJavaExecutablePath() {
     if (module.exports.isWindows()) {
       return path.join(module.exports.getInstallDir(), "JRE", "bin", "java.exe");
