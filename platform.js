@@ -102,13 +102,8 @@ module.exports = {
       detached: true
     }).unref();
   },
-  spawn(command, timeout) {
-    var args = command.split(" ")
-    .map((val)=>{return val.trim();})
-    .filter((val)=>{return val !== "";});
-
-    args.splice(0, 1);
-    log.debug("executing " + command.split(" ")[0] + " with [" + args + "]");
+  spawn(command, args, timeout) {
+    log.debug("executing " + command + " with " + args);
 
     return new Promise((res, rej)=>{
       var child,
@@ -117,7 +112,7 @@ module.exports = {
         stdio: "inherit"
       };
 
-      child = childProcess.spawn(command.split(" ")[0], args, options);
+      child = childProcess.spawn(command, args, options);
       child.on("close", (retCode)=>{
         res(retCode);
       });
@@ -128,30 +123,30 @@ module.exports = {
   },
   killJava() {
     if(module.exports.isWindows()) {
-      return module.exports.spawn("taskkill /f /im javaw.exe");
+      return module.exports.spawn("taskkill", ["/f", "/im", "javaw.exe"]);
     }
     else {
-      return module.exports.spawn("pkill -f Rise.*jar");
+      return module.exports.spawn("pkill", ["-f", "Rise.*jar"]);
     }
   },
   killInstaller() {
     if (module.exports.isWindows()) {
-      return module.exports.spawn("taskkill /f /im installer.exe");
+      return module.exports.spawn("taskkill", ["/f", "/im", "installer.exe"]);
     } else {
-      return module.exports.spawn("pkill -f " + module.exports.getInstallDir() + "/Installer");
+      return module.exports.spawn("pkill", ["-f", module.exports.getInstallDir() + "/Installer"]);
     }
   },
   killChromium() {
     if(module.exports.isWindows()) {
-      return module.exports.spawn("taskkill /f /im chrome.exe");
+      return module.exports.spawn("taskkill", ["/f", "/im", "chrome.exe"]);
     }
     else {
-      return module.exports.spawn("pkill -f " + path.join(module.exports.getInstallDir(), "chrome-linux") + "\n");
+      return module.exports.spawn("pkill", ["-f", path.join(module.exports.getInstallDir(), "chrome-linux")]);
     }
   },
   killExplorer() {
     if (module.exports.isWindows() && module.exports.getWindowsVersion() !== "7") {
-      return module.exports.spawn("taskkill /f /im explorer.exe");
+      return module.exports.spawn("taskkill", ["/f", "/im", "explorer.exe"]);
     } else {
       return Promise.resolve();
     }
@@ -388,12 +383,14 @@ module.exports = {
     return result;
   },
   reboot() {
-    var command = "shutdown -r -c Rise Player needs to reboot computer.";
+    var command = "shutdown",
+    args = ["-r", "-c", "Rise Player needs to reboot computer."];
 
     if(!module.exports.isWindows()) {
-      command = "bash -c dbus-send --system --print-reply --dest=org.freedesktop.login1 /org/freedesktop/login1 \"org.freedesktop.login1.Manager.Reboot\" boolean:true";
+      command = "bash";
+      args = ["-c", "dbus-send", "--system", "--print-reply", "--dest=org.freedesktop.login1", "/org/freedesktop/login1 \"org.freedesktop.login1.Manager.Reboot\"", "boolean:true"];
     }
 
-    return module.exports.spawn(command);
+    return module.exports.spawn(command, args);
   }
 };
