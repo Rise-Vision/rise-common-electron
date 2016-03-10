@@ -106,19 +106,28 @@ module.exports = {
     log.debug("executing " + command + " with " + args);
 
     return new Promise((res, rej)=>{
-      var child,
+      var child, handled,
       options = {
-        timeout: timeout || 9000,
         stdio: "inherit"
       };
 
       child = childProcess.spawn(command, args, options);
+      child.on("exit", (retCode)=>{
+        if (!handled) {res(retCode);}
+        handled = true;
+      });
       child.on("close", (retCode)=>{
-        res(retCode);
+        if (!handled) {res(retCode);}
+        handled = true;
       });
       child.on("error", (err)=>{
-        rej(err);
+        if (!handled) {rej(err);}
+        handled = true;
       });
+
+      setTimeout(()=>{
+        if(!handled) {rej("timeout");}
+      }, timeout || 9000);
     });
   },
   killJava() {
