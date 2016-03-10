@@ -84,7 +84,7 @@ describe("platform", ()=>{
 
     return platform.killJava().then(()=>{
       assert(platform.spawn.called);
-      assert(platform.spawn.lastCall.args[0].indexOf("javaw.exe") >= 0);
+      assert(platform.spawn.lastCall.args[1].indexOf("javaw.exe") >= 0);
     });
   });
 
@@ -104,7 +104,7 @@ describe("platform", ()=>{
 
     return platform.killChromium().then(()=>{
       assert(platform.spawn.called);
-      assert(platform.spawn.lastCall.args[0].indexOf("chrome.exe") >= 0);
+      assert(platform.spawn.lastCall.args[1].indexOf("chrome.exe") >= 0);
     });
   });
 
@@ -114,7 +114,7 @@ describe("platform", ()=>{
 
     return platform.killChromium().then(()=>{
       assert(platform.spawn.called);
-      assert(platform.spawn.lastCall.args[0].indexOf("chrome-linux") >= 0);
+      assert(platform.spawn.lastCall.args[1].indexOf(path.join(platform.getInstallDir(), "chrome-linux")) >= 0);
     });
   });
 
@@ -125,7 +125,7 @@ describe("platform", ()=>{
 
     return platform.killExplorer().then(()=>{
       assert(platform.spawn.called);
-      assert(platform.spawn.lastCall.args[0].indexOf("explorer.exe") >= 0);
+      assert(platform.spawn.lastCall.args[1].indexOf("explorer.exe") >= 0);
     });
   });
 
@@ -145,16 +145,6 @@ describe("platform", ()=>{
 
     return platform.killExplorer().then(()=>{
       assert(!platform.spawn.called);
-    });
-  });
-
-  it("kills Chromium on Linux", ()=>{
-    mock(platform, "isWindows").returnWith(false);
-    mock(platform, "spawn").resolveWith();
-
-    return platform.killChromium().then(()=>{
-      assert(platform.spawn.called);
-      assert(platform.spawn.lastCall.args[0].indexOf("chrome-linux") >= 0);
     });
   });
 
@@ -436,7 +426,7 @@ describe("platform", ()=>{
 
     return platform.reboot().then(()=>{
       assert(platform.spawn.called);
-      assert(platform.spawn.lastCall.args[0].indexOf("dbus-send") >= 0);
+      assert(platform.spawn.lastCall.args[1].indexOf("dbus-send") >= 0);
     });
   });
 
