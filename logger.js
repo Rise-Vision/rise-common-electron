@@ -7,10 +7,10 @@ module.exports = (externalLogger, logFolder)=> {
   function padLeft(number) {
     return (String(number).length === 1 ? "0" : "") + number;
   }
-  
+
   function getLogDatetime() {
     var d = new Date();
-    
+
     return [ d.getFullYear(),
              padLeft(d.getMonth() + 1),
              padLeft(d.getDate())].join("/") + " " +
@@ -73,14 +73,14 @@ module.exports = (externalLogger, logFolder)=> {
       appendToLog(detail, userFriendlyMessage);
 
       if (externalLogger) {externalLogger.log("error", detail);}
-      if (uiWindow) {uiWindow.send("errorMessage", userFriendlyMessage || detail);}
+      if (!uiWindow.isDestroyed()) {uiWindow.send("errorMessage", userFriendlyMessage || detail);}
     },
     all(evt, detail, pct) {
       console.log(evt, detail ? detail : "");
       appendToLog(detail, evt);
 
-      if (uiWindow && !pct) {uiWindow.send("message", detail ? evt + ": " + detail : evt);}
-      if (uiWindow && pct) {uiWindow.send("set-progress", {msg: evt, pct});}
+      if (!uiWindow.isDestroyed() && !pct) {uiWindow.send("message", detail ? evt + ": " + detail : evt);}
+      if (!uiWindow.isDestroyed() && pct) {uiWindow.send("set-progress", {msg: evt, pct});}
       if (externalLogger) {externalLogger.log(evt, detail);}
     },
     setUIWindow(win) {
@@ -98,7 +98,7 @@ module.exports = (externalLogger, logFolder)=> {
       appendToLog(detail, userFriendlyMessage);
     },
     progress(msg, pct) {
-      if (uiWindow) {uiWindow.send("set-progress", {msg, pct});}
+      if (!uiWindow.isDestroyed()) {uiWindow.send("set-progress", {msg, pct});}
     }
   };
 };

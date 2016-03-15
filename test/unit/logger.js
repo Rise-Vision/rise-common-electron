@@ -15,7 +15,7 @@ describe("launcher", ()=>{
     mock(externalLogger, "log").returnWith();
     mock(fs, "appendFileSync").returnWith();
     mock(fs, "mkdirSync").returnWith();
-    
+
     log = require("../../logger.js")(externalLogger, "installDir");
   });
 
@@ -24,13 +24,23 @@ describe("launcher", ()=>{
   });
 
   it("properly calls registered loggers on 'error' method", ()=>{
+    mock(uiWindow, "isDestroyed").returnWith(false);
     log.setUIWindow(uiWindow);
     log.error("test");
     assert(uiWindow.send.called);
     assert(externalLogger.log.called);
   });
 
+  it("does not call uiWindow.send if window destroyed", ()=>{
+    mock(uiWindow, "isDestroyed").returnWith(true);
+    log.setUIWindow(uiWindow);
+    log.error("test");
+    assert(!uiWindow.send.called);
+    assert(externalLogger.log.called);
+  });
+
   it("properly calls registered loggers on 'all' method", ()=>{
+    mock(uiWindow, "isDestroyed").returnWith(false);
     log.setUIWindow(uiWindow);
     log.all("test");
     assert(uiWindow.send.called);
