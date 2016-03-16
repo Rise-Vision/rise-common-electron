@@ -120,7 +120,7 @@ module.exports = {
       });
 
       req.on("socket", function (socket) {
-        socket.setTimeout(2000);  
+        socket.setTimeout(9000);
         socket.on("timeout", function() {
           if(!downloadStats[originalUrl].bytesReceived) {
             req.abort();
