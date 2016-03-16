@@ -4,6 +4,10 @@ path = require("path");
 module.exports = (externalLogger, logFolder)=> {
   var uiWindow;
 
+  function validUiWindow() {
+    return uiWindow && !uiWindow.isDestroyed();
+  }
+
   function padLeft(number) {
     return (String(number).length === 1 ? "0" : "") + number;
   }
@@ -73,14 +77,14 @@ module.exports = (externalLogger, logFolder)=> {
       appendToLog(detail, userFriendlyMessage);
 
       if (externalLogger) {externalLogger.log("error", detail);}
-      if (!uiWindow.isDestroyed()) {uiWindow.send("errorMessage", userFriendlyMessage || detail);}
+      if (validUiWindow()) {uiWindow.send("errorMessage", userFriendlyMessage || detail);}
     },
     all(evt, detail, pct) {
       console.log(evt, detail ? detail : "");
       appendToLog(detail, evt);
 
-      if (!uiWindow.isDestroyed() && !pct) {uiWindow.send("message", detail ? evt + ": " + detail : evt);}
-      if (!uiWindow.isDestroyed() && pct) {uiWindow.send("set-progress", {msg: evt, pct});}
+      if (validUiWindow() && !pct) {uiWindow.send("message", detail ? evt + ": " + detail : evt);}
+      if (validUiWindow() && pct) {uiWindow.send("set-progress", {msg: evt, pct});}
       if (externalLogger) {externalLogger.log(evt, detail);}
     },
     setUIWindow(win) {
@@ -98,7 +102,7 @@ module.exports = (externalLogger, logFolder)=> {
       appendToLog(detail, userFriendlyMessage);
     },
     progress(msg, pct) {
-      if (!uiWindow.isDestroyed()) {uiWindow.send("set-progress", {msg, pct});}
+      if (validUiWindow()) {uiWindow.send("set-progress", {msg, pct});}
     }
   };
 };
