@@ -304,7 +304,7 @@ module.exports = {
         resolve();
       } catch(e) {
         if (e.code !== "EEXIST") {
-          reject({ message: "Error creating directory", error: e });
+          reject({ message: "Error creating directory " + path, userFriendlyMessage: "Error creating directory: " + path, error: e });
         }
         else {
           resolve();
