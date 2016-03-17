@@ -32,8 +32,8 @@ module.exports = {
   getUbuntuVer() {
     return childProcess.spawnSync("lsb_release", ["-sr"]).stdout;
   },
-  getInstallDir() {
-    return path.join(module.exports.getHomeDir(), "rvplayer");
+  getInstallDir(version) {
+    return path.join(module.exports.getHomeDir(), "rvplayer", version || "");
   },
   getTempDir() {
     return path.join(os.tmpdir(), tempDir);
@@ -47,11 +47,11 @@ module.exports = {
   isRoot() {
     return process.getuid && process.getuid() === 0;
   },
-  getJavaExecutablePath() {
+  getJavaExecutablePath(version) {
     if (module.exports.isWindows()) {
-      return path.join(module.exports.getInstallDir(), "JRE", "bin", "java.exe");
+      return path.join(module.exports.getInstallDir(version), "JRE", "bin", "java.exe");
     } else {
-      return path.join(module.exports.getInstallDir(), "jre", "bin", "java");
+      return path.join(module.exports.getInstallDir(version), "jre", "bin", "java");
     }
   },
   getInstallerName() {
@@ -60,8 +60,8 @@ module.exports = {
   getOldInstallerName() {
     return module.exports.isWindows() ? "RiseVisionPlayer.exe" : "rvplayer";
   },
-  getInstallerDir() {
-    return path.join(module.exports.getInstallDir(), "Installer");
+  getInstallerDir(version) {
+    return path.join(module.exports.getInstallDir(version), "Installer");
   },
   getInstallerPath() {
     return path.join(module.exports.getInstallerDir(), module.exports.getInstallerName());
@@ -136,21 +136,6 @@ module.exports = {
     }
     else {
       return module.exports.spawn("pkill", ["-f", "Rise.*jar"]);
-    }
-  },
-  killInstaller() {
-    if (module.exports.isWindows()) {
-      return module.exports.spawn("taskkill", ["/f", "/im", "installer.exe"]);
-    } else {
-      return module.exports.spawn("pkill", ["-f", module.exports.getInstallDir() + "/Installer"]);
-    }
-  },
-  killChromium() {
-    if(module.exports.isWindows()) {
-      return module.exports.spawn("taskkill", ["/f", "/im", "chrome.exe"]);
-    }
-    else {
-      return module.exports.spawn("pkill", ["-f", path.join(module.exports.getInstallDir(), "chrome-linux")]);
     }
   },
   killExplorer() {
