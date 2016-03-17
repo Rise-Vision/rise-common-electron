@@ -98,26 +98,6 @@ describe("platform", ()=>{
     });
   });
 
-  it("kills Chromium on Windows", ()=>{
-    mock(platform, "isWindows").returnWith(true);
-    mock(platform, "spawn").resolveWith();
-
-    return platform.killChromium().then(()=>{
-      assert(platform.spawn.called);
-      assert(platform.spawn.lastCall.args[1].indexOf("chrome.exe") >= 0);
-    });
-  });
-
-  it("kills Chromium on Linux", ()=>{
-    mock(platform, "isWindows").returnWith(false);
-    mock(platform, "spawn").resolveWith();
-
-    return platform.killChromium().then(()=>{
-      assert(platform.spawn.called);
-      assert(platform.spawn.lastCall.args[1].indexOf(path.join(platform.getInstallDir(), "chrome-linux")) >= 0);
-    });
-  });
-
   it("kills explorer.exe on Windows 10", ()=>{
     mock(platform, "isWindows").returnWith(true);
     mock(platform, "spawn").resolveWith();
