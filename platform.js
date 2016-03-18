@@ -63,8 +63,8 @@ module.exports = {
   getInstallerDir(version) {
     return path.join(module.exports.getInstallDir(version), "Installer");
   },
-  getInstallerPath() {
-    return path.join(module.exports.getInstallerDir(), module.exports.getInstallerName());
+  getInstallerPath(version) {
+    return path.join(module.exports.getInstallerDir(version), module.exports.getInstallerName());
   },
   getOldInstallerPath() {
     return path.join(module.exports.getInstallDir(), module.exports.getOldInstallerName());
