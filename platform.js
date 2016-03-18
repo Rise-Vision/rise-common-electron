@@ -354,9 +354,10 @@ module.exports = {
       return function() {return Promise.resolve();};
     }
   },
-  createWindowsShortcut(lnkPath, exePath, args) {
+  createWindowsShortcut(version, lnkPath, exePath, args) {
     return new Promise((resolve, reject)=>{
-      ws.create(lnkPath, { target: exePath, args: args }, (err)=>{
+      var shortcutExePath = path.join(module.exports.getInstallerDir(version), "shortcut.exe");
+      ws.create(shortcutExePath, lnkPath, { target: exePath, args: args }, (err)=>{
         if(!err) {
           resolve();
         }
