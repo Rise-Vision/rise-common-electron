@@ -126,7 +126,7 @@ module.exports = {
       });
 
       setTimeout(()=>{
-        if(!handled) {rej("timeout");}
+        if(!handled) {rej(`spawn timeout: ${command} ${args}`);}
       }, timeout || 9000);
     });
   },
