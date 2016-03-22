@@ -1,5 +1,7 @@
 var fs = require("fs"),
-path = require("path");
+path = require("path"),
+debugging = process.argv.slice(1).join(" ").indexOf("debug") > -1,
+debug = (debugging ? (msg)=>{console.log(msg);} : ()=>{});
 
 module.exports = (externalLogger, logFolder)=> {
   var uiWindow;
@@ -64,23 +66,21 @@ module.exports = (externalLogger, logFolder)=> {
       }
     }
     catch (err) {
-      console.log("Error writing to log file", err);
+      debug("Error writing to log file", err);
     }
   }
 
   return {
-    debug(msg) {
-      console.log(msg);
-    },
+    debug,
     error(detail, userFriendlyMessage) {
-      console.log("ERROR: " + detail);
+      debug("ERROR: " + detail);
       appendToLog(detail, userFriendlyMessage);
 
       if (externalLogger) {externalLogger.log("error", detail);}
       if (validUiWindow()) {uiWindow.send("errorMessage", userFriendlyMessage || detail);}
     },
     all(evt, detail, pct) {
-      console.log(evt, detail ? detail : "");
+      debug(evt, detail ? detail : "");
       appendToLog(detail, evt);
 
       if (validUiWindow() && !pct) {uiWindow.send("message", detail ? evt + ": " + detail : evt);}
