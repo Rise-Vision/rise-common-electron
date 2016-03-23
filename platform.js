@@ -102,8 +102,9 @@ module.exports = {
       detached: true
     }).unref();
   },
-  spawn(command, args, timeout) {
-    log.debug("executing " + command + " with " + args);
+  spawn(command, args, timeout, tries) {
+    if (tries === undefined) {tries = 1;}
+    log.debug((tries - 1) + " remaining tries executing " + command + " with " + args);
 
     return new Promise((res, rej)=>{
       var child, handled,
@@ -121,12 +122,18 @@ module.exports = {
         handled = true;
       });
       child.on("error", (err)=>{
+        log.debug("spawn error " + require("util").inspect(err));
         if (!handled) {rej(err);}
         handled = true;
       });
 
       setTimeout(()=>{
-        if(!handled) {rej(`spawn timeout: ${command} ${args}`);}
+        if(!handled) {
+          log.debug(`spawn timeout: ${command} ${args}`);
+          tries -= 1;
+          if (tries === 0) {return rej(`spawn timeout: ${command} ${args}`);}
+          return res(module.exports.spawn(command, args, timeout, tries));
+        }
       }, timeout || 9000);
     });
   },
