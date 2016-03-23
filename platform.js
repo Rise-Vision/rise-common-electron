@@ -132,10 +132,10 @@ module.exports = {
   },
   killJava() {
     if(module.exports.isWindows()) {
-      return module.exports.spawn("taskkill", ["/f", "/im", "javaw.exe"]);
+      return module.exports.spawn("taskkill", ["/f", "/im", "javaw.exe"], 2, 2);
     }
     else {
-      return module.exports.spawn("pkill", ["-f", "Rise.*jar"]);
+      return module.exports.spawn("pkill", ["-f", "Rise.*jar"], 2, 2);
     }
   },
   killExplorer() {
