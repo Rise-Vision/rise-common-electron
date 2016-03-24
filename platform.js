@@ -107,33 +107,31 @@ module.exports = {
     log.debug((tries - 1) + " remaining tries executing " + command + " with " + args);
 
     return new Promise((res, rej)=>{
-      var child, handled,
+      var child, timeoutHandle,
       options = {
         stdio: "inherit"
       };
 
       child = childProcess.spawn(command, args, options);
       child.on("exit", (retCode)=>{
-        if (!handled) {res(retCode);}
-        handled = true;
+        res(retCode);
+        clearTimeout(timeoutHandle);
       });
       child.on("close", (retCode)=>{
-        if (!handled) {res(retCode);}
-        handled = true;
+        res(retCode);
+        clearTimeout(timeoutHandle);
       });
       child.on("error", (err)=>{
         log.debug("spawn error " + require("util").inspect(err));
-        if (!handled) {rej(err);}
-        handled = true;
+        rej(err);
+        clearTimeout(timeoutHandle);
       });
 
-      setTimeout(()=>{
-        if(!handled) {
-          log.debug(`spawn timeout: ${command} ${args}`);
-          tries -= 1;
-          if (tries === 0) {return rej(`spawn timeout: ${command} ${args}`);}
-          return res(module.exports.spawn(command, args, timeout, tries));
-        }
+      timeoutHandle = setTimeout(()=>{
+        log.debug(`spawn timeout: ${command} ${args}`);
+        tries -= 1;
+        if (tries === 0) {return rej(`spawn timeout: ${command} ${args}`);}
+        return res(module.exports.spawn(command, args, timeout, tries));
       }, timeout || 9000);
     });
   },
