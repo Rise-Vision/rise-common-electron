@@ -78,6 +78,27 @@ describe("platform", ()=>{
     assert.equal(childProcess.spawn.lastCall.args[2].detached, true);
   });
 
+  it("starts a detached child process after a couple of failures", function() {
+    var intervalHandler,
+    expectedCallCount = 3;
+
+    this.timeout(8000);
+    mock(childProcess, "spawn")
+    .throwWith(new Error("1"))
+    .throwWith(new Error("2"))
+    .returnWith({ unref() {} });
+
+    return new Promise((res)=>{
+      platform.startProcess("ls", ["-a", "*"]);
+      intervalHandler = setInterval(()=>{
+        if (childProcess.spawn.callCount === expectedCallCount) {
+          clearInterval(intervalHandler);
+          res();
+        }
+      }, 500);
+    });
+  });
+
   it("kills Java on Windows", ()=>{
     mock(platform, "isWindows").returnWith(true);
     mock(platform, "spawn").resolveWith();
