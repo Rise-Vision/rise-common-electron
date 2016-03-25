@@ -96,7 +96,7 @@ module.exports = {
     });
   },
   startProcess(command, args, tries) {
-    if (typeof tries === "undefined") {tries = 3;}
+    if (tries === undefined || tries === null) {tries = 3;}
     if (tries <= 0) {return;}
     tries -= 1;
 
