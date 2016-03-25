@@ -95,12 +95,23 @@ module.exports = {
       }, milliseconds);
     });
   },
-  startProcess(command, args) {
-    childProcess.spawn(command, args, {
-      cwd: path.dirname(command),
-      stdio: "ignore",
-      detached: true
-    }).unref();
+  startProcess(command, args, tries) {
+    if (typeof tries === "undefined") {tries = 3;}
+    if (tries <= 0) {return;}
+    tries -= 1;
+
+    try {
+      childProcess.spawn(command, args, {
+        cwd: path.dirname(command),
+        stdio: "ignore",
+        detached: true
+      }).unref();
+    } catch(err) {
+      if (tries === 0) {throw err;}
+      setTimeout(()=>{
+        module.exports.startProcess(command, args, tries);
+      }, 2000);
+    }
   },
   spawn(command, args, timeout, tries) {
     if (tries === undefined) {tries = 1;}
