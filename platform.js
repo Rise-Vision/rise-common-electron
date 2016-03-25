@@ -107,7 +107,7 @@ module.exports = {
         detached: true
       }).unref();
     } catch(err) {
-      if (tries === 0) {throw err;}
+      if (tries <= 0) {throw err;}
       setTimeout(()=>{
         module.exports.startProcess(command, args, tries);
       }, 2000);
