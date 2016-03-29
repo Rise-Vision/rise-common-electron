@@ -403,5 +403,23 @@ module.exports = {
     }
 
     return module.exports.spawn(command, args);
+  },
+  listDirectory(basePath) {
+    return new Promise((resolve, reject)=>{
+      var response = [];
+
+      fs.readdir(basePath, (err, items)=>{
+        if (err) { reject(err); }
+
+        items.forEach((item)=>{
+          var itemPath = path.join(basePath, item);
+          var stat = fs.statSync(itemPath);
+
+          response.push({ name: item, path: itemPath, isDirectory: stat.isDirectory()});
+        });
+
+        resolve(response);
+      });
+    });
   }
 };

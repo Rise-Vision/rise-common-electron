@@ -440,4 +440,32 @@ describe("platform", ()=>{
       assert(platform.spawn.lastCall.args[0].indexOf("shutdown") >= 0);
     });
   });
+
+  it("list a directory's content", ()=>{
+    mock(fs, "readdir").callbackWith(null, [ "file1", "file2" ]);
+    mock(fs, "statSync").callFn(()=>{
+      return {
+        isDirectory() { return false; }
+      };
+    });
+
+    return platform.listDirectory("localDir").then((response)=>{
+      assert(fs.readdir.called);
+      assert.equal(fs.statSync.callCount, 2);
+
+      assert.equal(response.length, 2);
+      assert.equal(response[0].path, path.join("localDir", "file1"));
+    });
+  });
+
+  it("fails to list a directory's content", ()=>{
+    mock(fs, "readdir").callbackWith("error");
+    mock(fs, "statSync").returnWith();
+
+    return platform.listDirectory("localDir").catch((err)=>{
+      assert(fs.readdir.called);
+      assert.equal(fs.statSync.callCount, 0);
+      assert.equal(err, "error");
+    });
+  });
 });
