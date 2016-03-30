@@ -383,6 +383,19 @@ module.exports = {
       });
     });
   },
+  queryWindowsShortcut(version, lnkPath) {
+    return new Promise((resolve, reject)=>{
+      var shortcutExePath = path.join(module.exports.getInstallerDir(version), "shortcut.exe");
+      ws.query(shortcutExePath, lnkPath, (err, options)=>{
+        if(!err) {
+          resolve(options);
+        }
+        else {
+          reject(err);
+        }
+      });
+    });
+  },
   parsePropertyList(list) {
     var result = {};
     list.split("\n").forEach((line)=>{

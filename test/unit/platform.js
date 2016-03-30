@@ -396,7 +396,7 @@ describe("platform", ()=>{
   it("creates a shortcut on Windows", ()=>{
     mock(ws, "create").callbackWith();
 
-    return platform.createWindowsShortcut()
+    return platform.createWindowsShortcut("shortcut.exe")
     .then(()=>{
       assert.ok(ws.create.called);
     });
@@ -405,9 +405,29 @@ describe("platform", ()=>{
   it("fails to create a shortcut on Windows", ()=>{
     mock(ws, "create").callbackWith("error");
 
-    return platform.createWindowsShortcut()
+    return platform.createWindowsShortcut("shortcut.exe")
     .catch((err)=>{
       assert.ok(ws.create.called);
+      assert.equal(err, "error");
+    });
+  });
+
+  it("queries a shortcut on Windows", ()=>{
+    mock(ws, "query").callbackWith(null, { target: "target.exe" });
+
+    return platform.queryWindowsShortcut("shortcut.exe")
+    .then((options)=>{
+      assert(ws.query.called);
+      assert(options.target);
+    });
+  });
+
+  it("fails to query a shortcut on Windows", ()=>{
+    mock(ws, "query").callbackWith("error");
+
+    return platform.queryWindowsShortcut("shortcut.exe")
+    .catch((err)=>{
+      assert(ws.query.called);
       assert.equal(err, "error");
     });
   });
