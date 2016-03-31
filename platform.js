@@ -403,5 +403,27 @@ module.exports = {
     }
 
     return module.exports.spawn(command, args);
+  },
+  getFreeDiskSpace() {
+    return new Promise((resolve, reject)=>{
+      if(module.exports.isWindows()) {
+        var winCommand = "wmic LogicalDisk Where \"Name='DRIVE:'\" GET FreeSpace".replace("DRIVE", module.exports.getInstallDir().substr(0, 1));
+
+        childProcess.exec(winCommand, (err, stdout)=>{
+          if(err) { reject(err); }
+
+          resolve(Number(stdout.split("\n")[1]));
+        });
+      }
+      else {
+        var lnxCommand = "df --block-size=K --output=avail " + module.exports.getInstallDir();
+
+        childProcess.exec(lnxCommand, (err, stdout)=>{
+          if(err) { reject(err); }
+
+          resolve(Number(stdout.replace("K", "").split("\n")[1]) * 1024);
+        });
+      }
+    });
   }
 };
