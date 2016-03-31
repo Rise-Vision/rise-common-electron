@@ -463,29 +463,38 @@ describe("platform", ()=>{
 
   it("list a directory's content", ()=>{
     mock(fs, "readdir").callbackWith(null, [ "file1", "file2" ]);
-    mock(fs, "statSync").callFn(()=>{
-      return {
-        isDirectory() { return false; }
-      };
+    mock(fs, "stat").callbackWith(null, {
+      isDirectory() { return false; }
     });
 
     return platform.listDirectory("localDir").then((response)=>{
       assert(fs.readdir.called);
-      assert.equal(fs.statSync.callCount, 2);
+      assert.equal(fs.stat.callCount, 2);
 
       assert.equal(response.length, 2);
       assert.equal(response[0].path, path.join("localDir", "file1"));
     });
   });
 
-  it("fails to list a directory's content", ()=>{
-    mock(fs, "readdir").callbackWith("error");
-    mock(fs, "statSync").returnWith();
+  it("fails to list a directory's content because of readdir error", ()=>{
+    mock(fs, "readdir").callbackWith("error readdir");
+    mock(fs, "stat").callbackWith();
 
     return platform.listDirectory("localDir").catch((err)=>{
       assert(fs.readdir.called);
-      assert.equal(fs.statSync.callCount, 0);
-      assert.equal(err, "error");
+      assert.equal(fs.stat.callCount, 0);
+      assert.equal(err, "error readdir");
+    });
+  });
+
+  it("fails to list a directory's content because of stat error", ()=>{
+    mock(fs, "readdir").callbackWith(null, [ "file1", "file2" ]);
+    mock(fs, "stat").callbackWith("error stat");
+
+    return platform.listDirectory("localDir").catch((err)=>{
+      assert(fs.readdir.called);
+      assert.equal(fs.stat.callCount, 1);
+      assert.equal(err, "error stat");
     });
   });
 });

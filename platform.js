@@ -426,12 +426,15 @@ module.exports = {
 
         items.forEach((item)=>{
           var itemPath = path.join(basePath, item);
-          var stat = fs.statSync(itemPath);
 
-          response.push({ name: item, path: itemPath, isDirectory: stat.isDirectory()});
+          fs.stat(itemPath, (err, stat)=>{
+            if(err) { reject(err); }
+            
+            response.push({ name: item, path: itemPath, isDirectory: stat.isDirectory()});
+
+            if(response.length === items.length) { resolve(response); }
+          });
         });
-
-        resolve(response);
       });
     });
   }
