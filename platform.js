@@ -383,6 +383,19 @@ module.exports = {
       });
     });
   },
+  queryWindowsShortcut(version, lnkPath) {
+    return new Promise((resolve, reject)=>{
+      var shortcutExePath = path.join(module.exports.getInstallerDir(version), "shortcut.exe");
+      ws.query(shortcutExePath, lnkPath, (err, options)=>{
+        if(!err) {
+          resolve(options);
+        }
+        else {
+          reject(err);
+        }
+      });
+    });
+  },
   parsePropertyList(list) {
     var result = {};
     list.split("\n").forEach((line)=>{
@@ -403,5 +416,26 @@ module.exports = {
     }
 
     return module.exports.spawn(command, args);
+  },
+  listDirectory(basePath) {
+    return new Promise((resolve, reject)=>{
+      var response = [];
+
+      fs.readdir(basePath, (err, items)=>{
+        if (err) { reject(err); }
+
+        items.forEach((item)=>{
+          var itemPath = path.join(basePath, item);
+
+          fs.stat(itemPath, (err, stat)=>{
+            if(err) { reject(err); }
+            
+            response.push({ name: item, path: itemPath, isDirectory: stat.isDirectory()});
+
+            if(response.length === items.length) { resolve(response); }
+          });
+        });
+      });
+    });
   }
 };
