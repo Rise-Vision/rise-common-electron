@@ -149,12 +149,16 @@ module.exports = {
     }
   },
   getLocalIP() {
-    return new Promise((res, rej)=> {
+    return new Promise((res)=> {
       var s = net.createConnection(80, "www.google.com", ()=>{
         res(s.localAddress);
         s.destroy();
       });
       s.on("error", ()=>res(null));
+      s.setTimeout(5000, ()=>{
+        s.destroy();
+        res(null);
+      });
     });
   },
 
