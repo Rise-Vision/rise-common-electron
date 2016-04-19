@@ -3,6 +3,7 @@ fetch = require("node-fetch"),
 http = require("http"),
 httpProxyAgent = require("http-proxy-agent"),
 httpsProxyAgent = require("https-proxy-agent"),
+net=require('net'),
 proxy = require("./proxy.js"),
 fetchOptions = {},
 javaProxyArgs = [],
@@ -149,16 +150,11 @@ module.exports = {
   },
   getLocalIP() {
     return new Promise((res, rej)=> {
-      var r = http.request({hostname: "google.com"});
-      r.on("socket", ()=>{
-        console.log("here");
-        r.end();
-        res(r.connection.localAddress);
+      var s = net.createConnection(80, "www.google.com", ()=>{
+        res(s.localAddress);
+        s.destroy();
       });
-      r.on("error", ()=>{
-        res(null);
-      });
-      r.flushHeaders();
+      s.on("error", ()=>res(null));
     });
   },
 
