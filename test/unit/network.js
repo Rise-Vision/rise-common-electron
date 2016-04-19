@@ -83,10 +83,4 @@ describe("network", ()=>{
       assert(err.message);
     });
   });
-
-  it("gets local ip address", ()=>{
-    return network.getLocalIP().then((ip)=>{
-      assert.ok(ip);
-    });
-  });
 });

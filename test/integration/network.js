@@ -70,6 +70,12 @@ describe("Network", function() {
     });
   });
 
+  it("gets local ip address", ()=>{
+    return network.getLocalIP().then((ip)=>{
+      assert.ok(ip);
+    });
+  });
+
   function startServer() {
     var server = express();
     server.use(express.static(path.resolve(__dirname, "test-files")));
@@ -91,5 +97,3 @@ describe("Network", function() {
     });
   }
 });
-
-
