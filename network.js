@@ -14,15 +14,6 @@ observers = [],
 maxRetries = 10;
 
 const downloadTimeout = 1000 * 60 * 20;
-var localIP;
-
-(function(){
-  var r = http.request({hostname: "google.com"}, ()=>{
-    localIP = r.connection.localAddress;
-    r.end();
-  });
-  r.flushHeaders(); // Force entry to callback
-})();
 
 proxy.observe(setNodeHttpAgent);
 function setNodeHttpAgent(fields) {
@@ -157,8 +148,20 @@ module.exports = {
     }
   },
   getLocalIP() {
-    return localIP;
+    return new Promise((res, rej)=> {
+      var r = http.request({hostname: "google.com"});
+      r.on("socket", ()=>{
+        console.log("here");
+        r.end();
+        res(r.connection.localAddress);
+      });
+      r.on("error", ()=>{
+        res(null);
+      });
+      r.flushHeaders();
+    });
   },
+
   registerObserver(fn) {
     observers.push(fn);
   }
