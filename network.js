@@ -14,6 +14,15 @@ observers = [],
 maxRetries = 10;
 
 const downloadTimeout = 1000 * 60 * 20;
+var localIP;
+
+(function(){
+  var r = http.request({hostname: "google.com"}, ()=>{
+    localIP = r.connection.localAddress;
+    r.end();
+  });
+  r.flushHeaders(); // Force entry to callback
+})();
 
 proxy.observe(setNodeHttpAgent);
 function setNodeHttpAgent(fields) {
@@ -28,7 +37,7 @@ proxy.observe(setJavaProxyArgs);
 function setJavaProxyArgs(fields) {
   if (!fields.hostname || !fields.port) {return (javaProxyArgs = []);}
   javaProxyArgs = [
-    `-Dhttp.proxyHost=${fields.hostname}`, 
+    `-Dhttp.proxyHost=${fields.hostname}`,
     `-Dhttp.proxyPort=${fields.port}`,
     `-Dhttps.proxyHost=${fields.hostname}`,
     `-Dhttps.proxyPort=${fields.port}`
@@ -84,7 +93,7 @@ module.exports = {
             reject({message: "Too many download attempts"});
             return;
           }
-          
+
           if (!res.headers.location) {
             reject({message: "Missing location header at " + originalUrl});
             return;
@@ -146,6 +155,9 @@ module.exports = {
         return code === 301 || code === 302 || code === 303 || code === 307 || code === 308;
       }
     }
+  },
+  getLocalIP() {
+    return localIP;
   },
   registerObserver(fn) {
     observers.push(fn);
