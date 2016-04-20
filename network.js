@@ -1,4 +1,5 @@
 var platform = require("./platform.js"),
+dns = require("dns"),
 fetch = require("node-fetch"),
 http = require("http"),
 httpProxyAgent = require("http-proxy-agent"),
@@ -164,5 +165,17 @@ module.exports = {
 
   registerObserver(fn) {
     observers.push(fn);
+  },
+  isOnline() {
+    return new Promise((res)=>{
+      dns.lookup('google.com',function(err) {
+        if (err && err.code == "ENOTFOUND") {
+          log.external("not online", require("util").inspect(err));
+          res(false);
+        } else {
+          res(true);
+        }
+      });
+    });
   }
 };
