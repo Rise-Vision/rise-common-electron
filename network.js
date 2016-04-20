@@ -3,6 +3,7 @@ fetch = require("node-fetch"),
 http = require("http"),
 httpProxyAgent = require("http-proxy-agent"),
 httpsProxyAgent = require("https-proxy-agent"),
+net=require('net'),
 proxy = require("./proxy.js"),
 fetchOptions = {},
 javaProxyArgs = [],
@@ -28,7 +29,7 @@ proxy.observe(setJavaProxyArgs);
 function setJavaProxyArgs(fields) {
   if (!fields.hostname || !fields.port) {return (javaProxyArgs = []);}
   javaProxyArgs = [
-    `-Dhttp.proxyHost=${fields.hostname}`, 
+    `-Dhttp.proxyHost=${fields.hostname}`,
     `-Dhttp.proxyPort=${fields.port}`,
     `-Dhttps.proxyHost=${fields.hostname}`,
     `-Dhttps.proxyPort=${fields.port}`
@@ -84,7 +85,7 @@ module.exports = {
             reject({message: "Too many download attempts"});
             return;
           }
-          
+
           if (!res.headers.location) {
             reject({message: "Missing location header at " + originalUrl});
             return;
@@ -147,6 +148,20 @@ module.exports = {
       }
     }
   },
+  getLocalIP() {
+    return new Promise((res)=> {
+      var s = net.createConnection(80, "www.google.com", ()=>{
+        res(s.localAddress);
+        s.destroy();
+      });
+      s.on("error", ()=>res(null));
+      s.setTimeout(5000, ()=>{
+        s.destroy();
+        res(null);
+      });
+    });
+  },
+
   registerObserver(fn) {
     observers.push(fn);
   }
