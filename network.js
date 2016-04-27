@@ -9,6 +9,7 @@ proxy = require("./proxy.js"),
 fetchOptions = {},
 javaProxyArgs = [],
 url = require("url"),
+path = require("path"),
 fs = require("fs"),
 downloadStats = {},
 observers = [],
@@ -53,6 +54,10 @@ module.exports = {
   },
   downloadFile(originalUrl, savePath) {
     var resolve, reject;
+
+    if(!savePath) {
+      savePath = path.join(platform.getTempDir(), url.parse(originalUrl).pathname.split("/").pop());
+    }
 
     downloadStats[originalUrl] = {tries: 0, bytesExpected: 0, bytesReceived: 0};
 
