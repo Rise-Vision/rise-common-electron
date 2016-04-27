@@ -52,9 +52,12 @@ module.exports = {
   callFetch(dest, opts) {
     return fetch(dest, opts);
   },
-  downloadFile(originalUrl) {
-    var resolve, reject,
-    savePath = path.join(platform.getTempDir(), url.parse(originalUrl).pathname.split("/").pop());
+  downloadFile(originalUrl, savePath) {
+    var resolve, reject;
+
+    if(!savePath) {
+      savePath = path.join(platform.getTempDir(), url.parse(originalUrl).pathname.split("/").pop());
+    }
 
     downloadStats[originalUrl] = {tries: 0, bytesExpected: 0, bytesReceived: 0};
 

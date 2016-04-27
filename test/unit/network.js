@@ -1,9 +1,7 @@
 var platform = require("../../platform.js"),
 network = require("../../network.js"),
 proxy = require("../../proxy.js"),
-fetch = require("node-fetch"),
 http = require("http"),
-urlParse = require("url").parse,
 path = require("path"),
 fs = require("fs"),
 assert = require("assert"),
@@ -40,6 +38,23 @@ describe("network", ()=>{
   });
 
   it("downloads a file using the given url", ()=>{
+    mock(http, "get").callbackWith({
+      statusCode: 200,
+      headers: {"content-length": 0},
+      on(name, cb) {
+        if(name === "end") { cb(); }
+        if(name === "data") { cb(""); }
+        if(name === "error") { cb("err"); }
+      }
+    });
+
+    return network.downloadFile("http://install-versions.risevision.com/RiseCache.zip", path.join("providedTestPath", "RiseCache.zip"))
+    .then((localPath)=>{
+      assert.equal(localPath, path.join("providedTestPath", "RiseCache.zip"));
+    });
+  });
+
+  it("downloads a file using the given url without providing a save path", ()=>{
     mock(http, "get").callbackWith({
       statusCode: 200,
       headers: {"content-length": 0},
