@@ -50,7 +50,7 @@ describe("network", ()=>{
       }
     });
 
-    return network.downloadFile("http://install-versions.risevision.com/RiseCache.zip")
+    return network.downloadFile("http://install-versions.risevision.com/RiseCache.zip", path.join("test", "RiseCache.zip"))
     .then((localPath)=>{
       assert.equal(localPath, path.join("test", "RiseCache.zip"));
     });
