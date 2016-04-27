@@ -8,7 +8,7 @@ rimraf = require("rimraf"),
 gunzip = require("gunzip-maybe"),
 tar = require("tar-fs"),
 ws = require("windows-shortcuts"),
-tempDir = "rvplayer-" + new Date().getTime();
+launchTimestamp = new Date().getTime();
 
 module.exports = {
   getCoreUrl() {
@@ -35,8 +35,8 @@ module.exports = {
   getInstallDir(version) {
     return path.join(module.exports.getHomeDir(), "rvplayer", version || "");
   },
-  getTempDir() {
-    return path.join(os.tmpdir(), tempDir);
+  getTempDir(version) {
+    return path.join(os.tmpdir(), ["rvplayer", version || "", String(launchTimestamp)].join("-"));
   },
   getCwd() {
     return process.cwd();
