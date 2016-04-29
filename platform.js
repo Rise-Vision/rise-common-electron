@@ -163,7 +163,10 @@ module.exports = {
   },
   launchExplorer() {
     if (module.exports.isWindows() && module.exports.getWindowsVersion() !== "7") {
-      return module.exports.spawn("cmd", ["/c", "explorer"]);
+      return module.exports.spawn("cmd", ["/c", "explorer"], 500)
+      .catch((err)=>{
+        log.debug("explorer call does not emit on close: " + err);
+      });
     } else {
       return Promise.resolve();
     }
