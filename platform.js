@@ -163,9 +163,11 @@ module.exports = {
   },
   launchExplorer() {
     if (module.exports.isWindows() && module.exports.getWindowsVersion() !== "7") {
-      return module.exports.spawn("cmd", ["/c", "explorer"]);
-    } else {
-      return Promise.resolve();
+      try {
+        module.exports.startProcess("cmd", ["/c", "explorer"], 1);
+      } catch (err) {
+        log.debug("explorer launch error: " + err);
+      }
     }
   },
   getWindowsVersion() {
