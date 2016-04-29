@@ -161,6 +161,13 @@ module.exports = {
       return Promise.resolve();
     }
   },
+  launchExplorer() {
+    if (module.exports.isWindows() && module.exports.getWindowsVersion() !== "7") {
+      return module.exports.spawn("cmd", ["/c", "explorer"]);
+    } else {
+      return Promise.resolve();
+    }
+  },
   getWindowsVersion() {
     var release = os.release();
 
