@@ -18,18 +18,25 @@ maxRetries = 10;
 
 const downloadTimeout = 1000 * 60 * 20;
 
-proxy.observe(setNodeHttpAgent);
-function setNodeHttpAgent(fields) {
-  log.debug("Setting proxy to " + fields.href);
-  if (!fields.href) {return (fetchOptions = {});}
-  fetchOptions.httpAgent = new httpProxyAgent(fields.href);
-  fetchOptions.httpsAgent = new httpsProxyAgent(fields.href);
+proxy.observe((fields)=>{
+  setNodeHttpAgent(fields);
+  setJavaProxyArgs(fields);
+
   proxyObservers.forEach((observer)=>{
     observer(fields);
   });
+});
+
+function setNodeHttpAgent(fields) {
+  log.debug("Setting proxy to " + fields.href);
+  if (!fields.href) {
+    fetchOptions = {};
+  } else {
+    fetchOptions.httpAgent = new httpProxyAgent(fields.href);
+    fetchOptions.httpsAgent = new httpsProxyAgent(fields.href);
+  }
 }
 
-proxy.observe(setJavaProxyArgs);
 function setJavaProxyArgs(fields) {
   if (!fields.hostname || !fields.port) {return (javaProxyArgs = []);}
   javaProxyArgs = [
