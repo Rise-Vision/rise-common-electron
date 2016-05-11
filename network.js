@@ -13,6 +13,7 @@ path = require("path"),
 fs = require("fs"),
 downloadStats = {},
 observers = [],
+proxyObservers = [],
 maxRetries = 10;
 
 const downloadTimeout = 1000 * 60 * 20;
@@ -23,8 +24,10 @@ function setNodeHttpAgent(fields) {
   if (!fields.href) {return (fetchOptions = {});}
   fetchOptions.httpAgent = new httpProxyAgent(fields.href);
   fetchOptions.httpsAgent = new httpsProxyAgent(fields.href);
+  proxyObservers.forEach((observer)=>{
+    observer(fields);
+  });
 }
-
 
 proxy.observe(setJavaProxyArgs);
 function setJavaProxyArgs(fields) {
@@ -168,6 +171,9 @@ module.exports = {
 
   registerObserver(fn) {
     observers.push(fn);
+  },
+  registerProxyUpdatedObserver(fn) {
+    proxyObservers.push(fn);
   },
   isOnline() {
     return new Promise((res)=>{
