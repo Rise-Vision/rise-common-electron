@@ -438,7 +438,7 @@ module.exports = {
   getDisplaySettingsPath() {
     return path.join(module.exports.getInstallDir(), "RiseDisplayNetworkII.ini");
   },
-  updateDisplayConfiguration(newConfiguration) {
+  updateDisplaySettings(newConfiguration) {
     if (typeof newConfiguration != "object") {
       throw new Error("Incorrect configuration type");
     }

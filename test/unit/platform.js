@@ -512,27 +512,27 @@ describe("platform", ()=>{
     assert.equal(displaySettingsPath, "root/RiseDisplayNetworkII.ini");
   });
 
-  describe("updateDisplayConfiguration", ()=>{
+  describe("updateDisplaySettings", ()=>{
     beforeEach(()=>{
       mock(platform, "writeTextFile").resolveWith();
       mock(platform, "readTextFileSync").returnWith("existing=data");
     });
 
     it("writes to RDNII", ()=>{
-      return platform.updateDisplayConfiguration({}).then(()=>{
+      return platform.updateDisplaySettings({}).then(()=>{
         assert(platform.writeTextFile.called);
         assert(/rvplayer\/RiseDisplayNetworkII.ini$/.test(platform.writeTextFile.calls[0].args[0]));
       });
     });
 
     it("writes new properties", ()=>{
-      return platform.updateDisplayConfiguration({new: "data"}).then(()=>{
+      return platform.updateDisplaySettings({new: "data"}).then(()=>{
         assert(/new=data/.test(platform.writeTextFile.calls[0].args[1]));
       });
     });
 
     it("preserves existing data", ()=>{
-      return platform.updateDisplayConfiguration({new: "data"}).then (()=>{
+      return platform.updateDisplaySettings({new: "data"}).then (()=>{
         assert(/existing=data/.test(platform.writeTextFile.calls[0].args[1]));
       });
     });
