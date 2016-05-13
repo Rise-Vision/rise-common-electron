@@ -434,5 +434,24 @@ module.exports = {
         });
       }
     });
+  },
+  getDisplaySettingsPath() {
+    return path.join(module.exports.getInstallDir(), "RiseDisplayNetworkII.ini");
+  },
+  updateDisplayConfiguration(newConfiguration) {
+    if (typeof newConfiguration != "object") {
+      throw new Error("Incorrect configuration type");
+    }
+    const configFile = module.exports.getDisplaySettingsPath();
+    const currentConfiguration = module.exports.parsePropertyList(module.exports.readTextFileSync(configFile));
+    const updatedConfiguration = Object.assign(currentConfiguration, newConfiguration);
+    const updatedConfigurationText = Object.keys(updatedConfiguration).reduce((acc, curr)=>{
+      if (updatedConfiguration[curr] != null) {
+        return acc + `${curr}=${updatedConfiguration[curr]}\n`;
+      } else {
+        return acc;
+      }
+    }, "");
+    return module.exports.writeTextFile(configFile, updatedConfigurationText);
   }
 };

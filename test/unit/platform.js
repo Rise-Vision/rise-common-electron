@@ -504,4 +504,38 @@ describe("platform", ()=>{
       assert.equal(err, "error");
     });
   });
+
+  it("returns display settings file path", ()=>{
+    var displaySettingsPath;
+    mock(platform, "getInstallDir").returnWith("root");
+    displaySettingsPath = platform.getDisplaySettingsPath();
+    assert.equal(displaySettingsPath, "root/RiseDisplayNetworkII.ini");
+  });
+
+  describe("updateDisplayConfiguration", ()=>{
+    beforeEach(()=>{
+      mock(platform, "writeTextFile").resolveWith();
+      mock(platform, "readTextFileSync").returnWith("existing=data");
+    });
+
+    it("writes to RDNII", ()=>{
+      return platform.updateDisplayConfiguration({}).then(()=>{
+        assert(platform.writeTextFile.called);
+        assert(/rvplayer\/RiseDisplayNetworkII.ini$/.test(platform.writeTextFile.calls[0].args[0]));
+      });
+    });
+
+    it("writes new properties", ()=>{
+      return platform.updateDisplayConfiguration({new: "data"}).then(()=>{
+        assert(/new=data/.test(platform.writeTextFile.calls[0].args[1]));
+      });
+    });
+
+    it("preserves existing data", ()=>{
+      return platform.updateDisplayConfiguration({new: "data"}).then (()=>{
+        assert(/existing=data/.test(platform.writeTextFile.calls[0].args[1]));
+      });
+    });
+
+  });
 });
