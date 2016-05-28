@@ -17,7 +17,15 @@ module.exports = {
       configObj = urlParse(configObj);
     }
 
-    if (configObj.username) {configObj.auth = `${configObj.username}:${configObj.password}`}
+    if (configObj.username) {
+      configObj.auth = `${configObj.username}:${configObj.password}`;
+    } else {
+      if (configObj.auth) {
+        configObj.username = configObj.auth.split(":")[0];
+        configObj.password = configObj.auth.split(":")[1];
+      }
+    }
+
     log.debug("proxy", configObj);
     config = Object.assign({}, configObj);
     module.exports.setPac(config);
