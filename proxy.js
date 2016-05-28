@@ -1,5 +1,9 @@
 var urlParse = require("url").parse,
-observers = [];
+platform = require("./platform.js"),
+observers = [],
+path = require("path"),
+fs = require("fs"),
+config = {};
 
 function reset() {
   observers.forEach((fn)=>{fn(urlParse(""));});
@@ -15,9 +19,25 @@ module.exports = {
 
     if (configObj.username) {configObj.auth = `${configObj.username}:${configObj.password}`}
     log.debug("proxy", configObj);
-    observers.forEach((fn)=>{fn(configObj);});
+    config = Object.assign({}, configObj);
+    module.exports.setPac(config);
+    observers.forEach((fn)=>{fn(config);});
   },
   observe(cb) {
     observers.push(cb);
+  },
+  pacScriptURL() {
+    return "file://" + path.join(platform.getInstallDir(), "proxy-pac.js");
+  },
+  configuration() {
+    return config;
+  },
+  setPac(configuration) {
+    let templatePath = path.join(__dirname, "proxy-pac-template.js"),
+    pacTemplate = platform.readTextFileSync(templatePath, {encoding: "utf8"}),
+    pacText = pacTemplate.replace("HOSTNAME", configuration.hostname)
+              .replace("PORT", configuration.port);
+
+    platform.writeTextFileSync(path.join(platform.getInstallDir(), "proxy-pac.js"), pacText);
   }
 };

@@ -1,8 +1,11 @@
 var proxy = require("../../proxy.js"),
 proxySetup = {},
 assert = require("assert"),
+url = require("url"),
 simpleMock = require("simple-mock"),
 platform = require("../../platform.js"),
+path = require("path"),
+fs = require("fs"),
 mock = require("simple-mock").mock;
 
 proxy.observe((proxyFields)=>{proxySetup.proxyFields = proxyFields;});
@@ -34,5 +37,20 @@ describe("proxy", ()=>{
   it("does not set the new endpoint", ()=>{
     proxy.setEndpoint();
     assert.equal(proxySetup.proxyFields.href, "");
+  });
+
+  it("returns a url to the PAC file", ()=>{
+    assert.ok(url.parse(proxy.pacScriptURL()).href);
+  });
+
+  it("provides configuration information", ()=>{
+    proxy.setEndpoint({username: "test", hostname: "test"});
+    assert.equal(proxy.configuration().hostname, "test")
+  });
+
+  it.only("creates a pac file from the template", ()=>{
+    let pacFilePath = path.join(platform.getInstallDir(), "proxy-pac.js"); 
+    proxy.setEndpoint({hostname: "test", port: 80});
+    assert.ok(fs.readFileSync(pacFilePath, {encoding: "utf8"}).includes("PROXY test:80"));
   });
 });
