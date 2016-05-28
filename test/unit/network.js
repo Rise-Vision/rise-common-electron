@@ -25,15 +25,16 @@ describe("network", ()=>{
 
   it("handles proxy changes", ()=>{
     var resultingProxySetup,
-    expectedProxyHref = "http://127.0.0.1:8888/";
+    proxySetup = {hostname: "127.0.0.1", port: 8888};
 
-    proxy.setEndpoint({address: "127.0.0.1", port: "8888"});
+    proxy.setEndpoint(proxySetup);
     mock(network, "callFetch").resolveWith({});
 
     return network.httpFetch("http://testdest.com")
     .then(()=>{
+      console.log(network.callFetch);
       resultingProxySetup = network.callFetch.calls[0].args[1].agent.proxy;
-      assert.equal(resultingProxySetup.href, expectedProxyHref);
+      assert.equal(resultingProxySetup.hostname, proxySetup.hostname);
     });
   });
 

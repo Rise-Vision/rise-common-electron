@@ -7,20 +7,15 @@ function reset() {
 
 module.exports = {
   setEndpoint(configObj) {
-    var newFields;
+    if (!configObj) {return reset();}
+
     if (typeof configObj === "string") {
       configObj = urlParse(configObj);
-      configObj.address = configObj.hostname;
     }
 
-    if (!configObj || !configObj.address) {return reset();}
-    if (configObj.address.substring(0,4) !== "http") {
-      configObj.address = "http://" + configObj.address;
-    }
-
+    if (configObj.username) {configObj.auth = `${configObj.username}:${configObj.password}`}
     log.debug("proxy", configObj);
-    newFields = urlParse(configObj.address + ":" + (configObj.port ? configObj.port : ""));
-    observers.forEach((fn)=>{fn(newFields);});
+    observers.forEach((fn)=>{fn(configObj);});
   },
   observe(cb) {
     observers.push(cb);

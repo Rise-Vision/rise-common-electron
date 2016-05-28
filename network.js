@@ -28,12 +28,12 @@ proxy.observe((fields)=>{
 });
 
 function setNodeHttpAgent(fields) {
-  log.debug("Setting proxy to " + fields.href);
-  if (!fields.href) {
+  log.debug("Setting proxy to " + JSON.stringify(fields));
+  if (!fields.hostname) {
     fetchOptions = {};
   } else {
-    fetchOptions.httpAgent = new httpProxyAgent(fields.href);
-    fetchOptions.httpsAgent = new httpsProxyAgent(fields.href);
+    fetchOptions.httpAgent = new httpProxyAgent(fields);
+    fetchOptions.httpsAgent = new httpsProxyAgent(fields);
   }
 }
 
@@ -43,7 +43,8 @@ function setJavaProxyArgs(fields) {
     `-Dhttp.proxyHost=${fields.hostname}`,
     `-Dhttp.proxyPort=${fields.port}`,
     `-Dhttps.proxyHost=${fields.hostname}`,
-    `-Dhttps.proxyPort=${fields.port}`
+    `-Dhttps.proxyPort=${fields.port}`,
+    `-Dhttp.nonProxyHosts="localhost|127.0.0.1|0.0.0.0"`
   ];
 }
 
