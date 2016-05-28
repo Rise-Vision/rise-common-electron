@@ -63,4 +63,16 @@ describe("proxy", ()=>{
     assert.equal(proxySetup.proxyFields.username, "user");
     assert.equal(proxySetup.proxyFields.password, "pass");
   });
+
+  it("includes href", ()=>{
+    proxy.setEndpoint({hostname: "test", port: 80, auth: "user:pass"});
+    assert.equal(proxySetup.proxyFields.href, "http://user:pass@test:80");
+  });
+
+  it("sets endpoint from a string", ()=>{
+    proxy.setEndpoint("http://u:p@test1234:80");
+    assert.equal(proxySetup.proxyFields.hostname, "test1234");
+    assert.equal(proxySetup.proxyFields.username, "u");
+    assert.equal(proxySetup.proxyFields.auth, "u:p");
+  });
 });

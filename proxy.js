@@ -18,12 +18,21 @@ module.exports = {
     }
 
     if (configObj.username) {
-      configObj.auth = `${configObj.username}:${configObj.password}`;
+      configObj.auth = `${configObj.username}`;
+      if (configObj.password) {
+        configObj.auth += `:${configObj.password}`;
+      }
     } else {
       if (configObj.auth) {
         configObj.username = configObj.auth.split(":")[0];
         configObj.password = configObj.auth.split(":")[1];
       }
+    }
+
+    if (!configObj.href) {
+      let authString = configObj.auth;
+      if (authString) {authString += "@"}
+      configObj.href = `http://${authString || ""}${configObj.hostname}:${configObj.port}`
     }
 
     log.debug("proxy", configObj);
