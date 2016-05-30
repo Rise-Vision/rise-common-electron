@@ -2,11 +2,15 @@ var urlParse = require("url").parse,
 platform = require("./platform.js"),
 observers = [],
 path = require("path"),
+pacScriptPath = path.join(platform.getInstallDir(), "proxy-pac.js"),
 fs = require("fs"),
 config = {};
 
 function reset() {
-  observers.forEach((fn)=>{fn(urlParse(""));});
+  config = urlParse("");
+  config.username = "";
+  config.password = "";
+  observers.forEach((fn)=>{fn(config);});
 }
 
 module.exports = {
@@ -44,17 +48,16 @@ module.exports = {
     observers.push(cb);
   },
   pacScriptURL() {
-    return "file://" + path.join(platform.getInstallDir(), "proxy-pac.js");
+    return "file://" + pacScriptPath;
   },
   configuration() {
     return config;
   },
   setPac(configuration) {
     let templatePath = path.join(__dirname, "proxy-pac-template.js"),
-    pacTemplate = platform.readTextFileSync(templatePath, {encoding: "utf8"}),
+    pacTemplate = platform.readTextFileSync(templatePath, "utf8"),
     pacText = pacTemplate.replace("HOSTNAME", configuration.hostname)
               .replace("PORT", configuration.port);
-
-    platform.writeTextFileSync(path.join(platform.getInstallDir(), "proxy-pac.js"), pacText);
+    platform.writeTextFileSync(pacScriptPath, pacText);
   }
 };

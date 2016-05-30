@@ -1,5 +1,4 @@
 function FindProxyForURL(url, host) {
-   
   //If the requested website is hosted within the internal network, send direct.
     if (isPlainHostName(host) ||
         shExpMatch(host, "*.local") ||

@@ -32,7 +32,6 @@ describe("network", ()=>{
 
     return network.httpFetch("http://testdest.com")
     .then(()=>{
-      console.log(network.callFetch);
       resultingProxySetup = network.callFetch.calls[0].args[1].agent.proxy;
       assert.equal(resultingProxySetup.hostname, proxySetup.hostname);
     });
