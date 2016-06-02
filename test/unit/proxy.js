@@ -48,9 +48,10 @@ describe("proxy", ()=>{
   });
 
   it("creates a pac file from the template", ()=>{
-    let pacFilePath = path.join(platform.getInstallDir(), "proxy-pac.js"); 
+    mock(platform, "writeTextFileSync").returnWith();
     proxy.setEndpoint({hostname: "test", port: 80});
-    assert.ok(fs.readFileSync(pacFilePath, {encoding: "utf8"}).includes("PROXY test:80"));
+    console.log(platform.writeFileSync);
+    assert.ok(platform.writeTextFileSync.lastCall.args[1].includes("PROXY test:80"));
   });
 
   it("parses auth from username, password", ()=>{
