@@ -44,7 +44,7 @@ function setJavaProxyArgs(fields) {
     `-Dhttp.proxyPort=${fields.port}`,
     `-Dhttps.proxyHost=${fields.hostname}`,
     `-Dhttps.proxyPort=${fields.port}`,
-    `-Dhttp.nonProxyHosts="localhost|127.0.0.1|0.0.0.0"`
+    `-Dhttp.nonProxyHosts="10.*|192.168.*|0.0.*|localhost|127.*|[::1]"`
   ];
 }
 
