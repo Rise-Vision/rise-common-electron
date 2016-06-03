@@ -65,6 +65,18 @@ describe("proxy", ()=>{
     assert.equal(proxySetup.proxyFields.password, "pass");
   });
 
+  it("provies username, password from auth field with no password", ()=>{
+    proxy.setEndpoint({hostname: "test", auth: "user"});
+    assert.equal(proxySetup.proxyFields.username, "user");
+    assert.equal(proxySetup.proxyFields.password, "");
+  });
+
+  it("provies username, password from auth field with password containing colon", ()=>{
+    proxy.setEndpoint({hostname: "test", auth: "user:pass:with:colon"});
+    assert.equal(proxySetup.proxyFields.username, "user");
+    assert.equal(proxySetup.proxyFields.password, "pass:with:colon");
+  });
+
   it("includes href", ()=>{
     proxy.setEndpoint({hostname: "test", port: 80, auth: "user:pass"});
     assert.equal(proxySetup.proxyFields.href, "http://user:pass@test:80");

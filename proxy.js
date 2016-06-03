@@ -28,8 +28,9 @@ module.exports = {
       }
     } else {
       if (configObj.auth) {
-        configObj.username = configObj.auth.split(":")[0];
-        configObj.password = configObj.auth.split(":")[1];
+        let [user, ...pass] = configObj.auth.split(":");
+        configObj.username = user;
+        configObj.password = pass.join(":");
       }
     }
 
