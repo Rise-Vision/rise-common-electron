@@ -1,28 +1,64 @@
 var urlParse = require("url").parse,
-observers = [];
+platform = require("./platform.js"),
+observers = [],
+path = require("path"),
+pacScriptPath = path.join(platform.getInstallDir(), "proxy-pac.js"),
+fs = require("fs"),
+config = {};
 
 function reset() {
-  observers.forEach((fn)=>{fn(urlParse(""));});
+  config = urlParse("");
+  config.username = "";
+  config.password = "";
+  observers.forEach((fn)=>{fn(config);});
 }
 
 module.exports = {
   setEndpoint(configObj) {
-    var newFields;
+    if (!configObj) {return reset();}
+
     if (typeof configObj === "string") {
       configObj = urlParse(configObj);
-      configObj.address = configObj.hostname;
     }
 
-    if (!configObj || !configObj.address) {return reset();}
-    if (configObj.address.substring(0,4) !== "http") {
-      configObj.address = "http://" + configObj.address;
+    if (configObj.username) {
+      configObj.auth = `${configObj.username}`;
+      if (configObj.password) {
+        configObj.auth += `:${configObj.password}`;
+      }
+    } else {
+      if (configObj.auth) {
+        let [user, ...pass] = configObj.auth.split(":");
+        configObj.username = user;
+        configObj.password = pass.join(":");
+      }
+    }
+
+    if (!configObj.href) {
+      let authString = configObj.auth;
+      if (authString) {authString += "@"}
+      configObj.href = `http://${authString || ""}${configObj.hostname}:${configObj.port}`
     }
 
     log.debug("proxy", configObj);
-    newFields = urlParse(configObj.address + ":" + (configObj.port ? configObj.port : ""));
-    observers.forEach((fn)=>{fn(newFields);});
+    config = Object.assign({}, configObj);
+    module.exports.setPac(config);
+    observers.forEach((fn)=>{fn(config);});
   },
   observe(cb) {
     observers.push(cb);
+  },
+  pacScriptURL() {
+    return "file://" + pacScriptPath;
+  },
+  configuration() {
+    return config;
+  },
+  setPac(configuration) {
+    let templatePath = path.join(__dirname, "proxy-pac-template.js"),
+    pacTemplate = platform.readTextFileSync(templatePath, "utf8"),
+    pacText = pacTemplate.replace("HOSTNAME", configuration.hostname)
+              .replace("PORT", configuration.port);
+    platform.writeTextFileSync(pacScriptPath, pacText);
   }
 };
