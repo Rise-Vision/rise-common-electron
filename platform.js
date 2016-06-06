@@ -4,6 +4,7 @@ path = require("path"),
 mkdirp = require("mkdirp"),
 os = require("os"),
 fs = require("fs-extra"),
+electronFS = require("fs"),
 rimraf = require("rimraf"),
 gunzip = require("gunzip-maybe"),
 tar = require("tar-fs"),
@@ -189,9 +190,11 @@ module.exports = {
       return "10";
     }
   },
-  readTextFile(path) {
+  readTextFile(path, options = {}) {
+    let fsModule = options.inASAR ? electronFS : fs;
+
     return new Promise((resolve, reject)=>{
-      fs.readFile(path, "utf8", function (err, data) {
+      fsModule.readFile(path, "utf8", function (err, data) {
         if(!err) {
           resolve(data);
         }
@@ -201,11 +204,13 @@ module.exports = {
       });
     });
   },
-  readTextFileSync(path) {
+  readTextFileSync(path, options = {}) {
     var stringContents = "";
 
     try {
-      stringContents = fs.readFileSync(path, "utf8");
+      stringContents = options.inASAR ?
+      electronFS.readFileSync(path, "utf8") :
+      fs.readFileSync(path, "utf8");
     } catch (e) {
       log.file("Could not read file " + path + " " + require("util").inspect(e));
     }

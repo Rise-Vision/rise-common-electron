@@ -56,7 +56,7 @@ module.exports = {
   },
   setPac(configuration) {
     let templatePath = path.join(__dirname, "proxy-pac-template.js"),
-    pacTemplate = platform.readTextFileSync(templatePath, "utf8"),
+    pacTemplate = platform.readTextFileSync(templatePath, {inASAR: true}),
     pacText = pacTemplate.replace("HOSTNAME", configuration.hostname)
               .replace("PORT", configuration.port);
     platform.writeTextFileSync(pacScriptPath, pacText);
