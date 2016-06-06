@@ -201,11 +201,13 @@ module.exports = {
       });
     });
   },
-  readTextFileSync(path) {
+  readTextFileSync(path, options) {
     var stringContents = "";
+    let fsModule = fs;
+    if (options && options.inASAR) {fsModule = require("fs");}
 
     try {
-      stringContents = fs.readFileSync(path, "utf8");
+      stringContents = fsModule.readFileSync(path, "utf8");
     } catch (e) {
       log.file("Could not read file " + path + " " + require("util").inspect(e));
     }
