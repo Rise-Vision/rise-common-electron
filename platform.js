@@ -33,6 +33,31 @@ module.exports = {
   getUbuntuVer() {
     return childProcess.spawnSync("lsb_release", ["-sr"]).stdout;
   },
+  getLinuxDescription() {
+    let releaseInfo;
+
+    try {
+      releaseInfo = module.exports.parsePropertyList(fs.readFileSync("/etc/os-release", "utf8"));
+    } catch (e) {
+      log.debug(e);
+      releaseInfo = {};
+    }
+
+    return (releaseInfo.PRETTY_NAME ? releaseInfo.PRETTY_NAME.replace('"', "").replace("'", "") : "") ||
+    "Linux " + childProcess.spawnSync("uname", ["-r"]).stdout.toString().trim();
+  },
+  getLSBDescription() {
+    return childProcess.spawnSync("lsb_release", ["-ds"]).stdout;
+  },
+  getOSDescription() {
+    let archString = {"ia32": "32-bit", "x64": "64-bit"};
+
+    return (archString[os.arch()] || os.arch()) + " " +
+    (os.platform() === "win32" ?
+    module.exports.getWindowsOSCaption() :
+    module.exports.getLSBDescription() ||
+    module.exports.getLinuxDescription());
+  },
   getInstallDir(version) {
     return path.join(module.exports.getHomeDir(), "rvplayer", version || "");
   },
@@ -189,6 +214,13 @@ module.exports = {
     else if(release.startsWith("10.0")) {
       return "10";
     }
+  },
+  getWindowsOSCaption() {
+    let captionArgs = ["os", "get", "Caption", "/format:list"],
+    caption = childProcess.spawnSync("wmic", captionArgs)
+    .stdout.toString().trim().split("=")[1];
+
+    return  caption;
   },
   readTextFile(path, options = {}) {
     let fsModule = options.inASAR ? electronFS : fs;
