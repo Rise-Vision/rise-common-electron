@@ -13,12 +13,14 @@ path = require("path"),
 fs = require("fs"),
 downloadStats = {},
 observers = [],
+proxyFields = null,
 proxyObservers = [],
 maxRetries = 10;
 
 const downloadTimeout = 1000 * 60 * 20;
 
 proxy.observe((fields)=>{
+  proxyFields = fields;
   setNodeHttpAgent(fields);
   setJavaProxyArgs(fields);
 
@@ -180,6 +182,9 @@ module.exports = {
   },
   registerProxyUpdatedObserver(fn) {
     proxyObservers.push(fn);
+    if (proxyFields) {
+      fn(proxyFields);
+    }
   },
   isOnline() {
     return new Promise((res)=>{
