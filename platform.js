@@ -43,7 +43,7 @@ module.exports = {
       releaseInfo = {};
     }
 
-    return (releaseInfo.PRETTY_NAME ? releaseInfo.PRETTY_NAME.replace('"', "").replace("'", "") : "") ||
+    return (releaseInfo.PRETTY_NAME ? releaseInfo.PRETTY_NAME.replace(/"|'/g, "") : "") ||
     "Linux " + childProcess.spawnSync("uname", ["-r"]).stdout.toString().trim();
   },
   getLSBDescription() {
