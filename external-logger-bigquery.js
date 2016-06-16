@@ -1,9 +1,9 @@
-module.exports = (network, systemOS, systemArch, installerVersion)=>{
+module.exports = (network, systemOS, systemArch, installerVersion, osDesc)=>{
   var config = require("./config.json"),
   refreshDate = 0,
   token = "",
   displaySettings = {},
-  os = systemOS + " " + systemArch;
+  os = osDesc || (systemOS + " " + systemArch);
 
   function getDateForTableName(nowDate) {
     var date = nowDate,
