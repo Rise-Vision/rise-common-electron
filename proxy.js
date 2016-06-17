@@ -35,12 +35,16 @@ module.exports = {
     }
 
     if (!configObj.href) {
-      let authString = configObj.auth;
+      let authString = configObj.auth,
+      port = configObj.port;
+      
       if (authString) {authString += "@"}
-      configObj.href = `http://${authString || ""}${configObj.hostname}:${configObj.port}`
+      if (port) {port = ":" + port}
+
+      configObj.href = `http://${authString || ""}${configObj.hostname || ""}${port || ""}`
     }
 
-    log.debug("proxy", configObj);
+    log.debug("proxy config: " + JSON.stringify(configObj));
     config = Object.assign({}, configObj);
     module.exports.setPac(config);
     observers.forEach((fn)=>{fn(config);});
