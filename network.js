@@ -186,16 +186,18 @@ module.exports = {
       fn(proxyFields);
     }
   },
-  isOnline() {
+  isOnline(retryCount = 2) {
     return new Promise((res)=>{
-      dns.lookup('google.com',function(err) {
-        if (err && err.code == "ENOTFOUND") {
-          log.external("not online", require("util").inspect(err));
-          res(false);
-        } else {
-          res(true);
-        }
-      });
+      setTimeout(()=>{
+        dns.lookup('google.com',function(err) {
+          if (err && err.code == "ENOTFOUND") {
+            log.external("not online", require("util").inspect(err));
+            res(retryCount <= 0 ? false : module.exports.isOnline(retryCount - 1));
+          } else {
+            res(true);
+          }
+        });
+      }, 500);
     });
   }
 };
