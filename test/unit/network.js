@@ -100,7 +100,7 @@ describe("network", ()=>{
     });
   });
 
-  it("checks for online connection", ()=>{
+  it("passes online check", ()=>{
     mock(dns, "lookup").callbackWith(null);
 
     return network.isOnline()
@@ -110,7 +110,19 @@ describe("network", ()=>{
     });
   });
 
-  it("checks for online connection with retries", ()=>{
+  it("eventually passes online check", ()=>{
+    mock(dns, "lookup")
+    .callbackWith({code: "ENOTFOUND"})
+    .callbackWith({});
+
+    return network.isOnline()
+    .then((result)=>{
+      assert.equal(dns.lookup.callCount, 2);
+      assert.equal(result, true);
+    });
+  });
+
+  it("eventually fails online check", ()=>{
     mock(dns, "lookup").callbackWith({code: "ENOTFOUND"});
 
     return network.isOnline()
