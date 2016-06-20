@@ -1,5 +1,6 @@
 var platform = require("../../platform.js"),
 network = require("../../network.js"),
+dns = require("dns"),
 proxy = require("../../proxy.js"),
 http = require("http"),
 path = require("path"),
@@ -96,6 +97,26 @@ describe("network", ()=>{
     return network.downloadFile("http://install-versions.risevision.com/RiseCache.zip")
     .catch((err)=>{
       assert(err.message);
+    });
+  });
+
+  it("checks for online connection", ()=>{
+    mock(dns, "lookup").callbackWith(null);
+
+    return network.isOnline()
+    .then((result)=>{
+      assert.equal(dns.lookup.callCount, 1);
+      assert.equal(result, true);
+    });
+  });
+
+  it("checks for online connection with retries", ()=>{
+    mock(dns, "lookup").callbackWith({code: "ENOTFOUND"});
+
+    return network.isOnline()
+    .then((result)=>{
+      assert.equal(dns.lookup.callCount, 3);
+      assert.equal(result, false);
     });
   });
 });
