@@ -2,8 +2,7 @@ var urlParse = require("url").parse,
 platform = require("./platform.js"),
 observers = [],
 path = require("path"),
-pacScriptPath = path.join(platform.getInstallDir(), "proxy-pac.js"),
-fs = require("fs"),
+pacScriptPath = null,
 config = {};
 
 function reset() {
@@ -14,6 +13,9 @@ function reset() {
 }
 
 module.exports = {
+  setSaveDir(saveDir) {
+    pacScriptPath = path.join(saveDir, "proxy-pac.js");
+  },
   setEndpoint(configObj) {
     if (!configObj) {return reset();}
 
@@ -37,7 +39,7 @@ module.exports = {
     if (!configObj.href) {
       let authString = configObj.auth,
       port = configObj.port;
-      
+
       if (authString) {authString += "@"}
       if (port) {port = ":" + port}
 

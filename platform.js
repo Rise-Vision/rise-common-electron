@@ -8,8 +8,7 @@ electronFS = require("fs"),
 rimraf = require("rimraf"),
 gunzip = require("gunzip-maybe"),
 tar = require("tar-fs"),
-ws = require("windows-shortcuts"),
-launchTimestamp = new Date().getTime();
+ws = require("windows-shortcuts");
 
 module.exports = {
   getCoreUrl() {
@@ -58,12 +57,6 @@ module.exports = {
     module.exports.getLSBDescription() ||
     module.exports.getLinuxDescription());
   },
-  getInstallDir(version) {
-    return path.join(module.exports.getHomeDir(), "rvplayer", version || "");
-  },
-  getTempDir(version) {
-    return path.join(os.tmpdir(), ["rvplayer", version || "", String(launchTimestamp)].join("-"));
-  },
   getCwd() {
     return process.cwd();
   },
@@ -72,31 +65,6 @@ module.exports = {
   },
   isRoot() {
     return process.getuid && process.getuid() === 0;
-  },
-  getJavaExecutablePath(version) {
-    if (module.exports.isWindows()) {
-      return path.join(module.exports.getInstallDir(version), "JRE", "bin", "java.exe");
-    } else {
-      return path.join(module.exports.getInstallDir(version), "jre", "bin", "java");
-    }
-  },
-  getInstallerName() {
-    return module.exports.isWindows() ? "installer.exe" : "installer";
-  },
-  getOldInstallerName() {
-    return module.exports.isWindows() ? "RiseVisionPlayer.exe" : "rvplayer";
-  },
-  getInstallerDir(version) {
-    return path.join(module.exports.getInstallDir(version), "Installer");
-  },
-  getInstallerPath(version) {
-    return path.join(module.exports.getInstallerDir(version), module.exports.getInstallerName());
-  },
-  getOldInstallerPath() {
-    return path.join(module.exports.getInstallDir(), module.exports.getOldInstallerName());
-  },
-  getUncaughtErrorFileName() {
-    return path.join(module.exports.getInstallDir(), "uncaught-exception.json");
   },
   getProgramsMenuPath() {
     if(module.exports.isWindows()) {
@@ -401,24 +369,8 @@ module.exports = {
   callMkdirp(path, cb) {
     mkdirp(path, cb);
   },
-  isFirstRun() {
-    try {
-      fs.statSync(module.exports.getInstallerDir());
-      return false;
-    }catch (e) {
-      return true;
-    }
-  },
-  onFirstRun(whatToDo) {
-    if (module.exports.isFirstRun()) {
-      return whatToDo;
-    } else {
-      return function() {return Promise.resolve();};
-    }
-  },
-  createWindowsShortcut(version, lnkPath, exePath, args, iconPath) {
+  createWindowsShortcut(shortcutExePath, version, lnkPath, exePath, args, iconPath) {
     return new Promise((resolve, reject)=>{
-      var shortcutExePath = path.join(module.exports.getInstallerDir(version), "shortcut.exe");
       ws.create(shortcutExePath, lnkPath, { target: exePath, args: args, icon: iconPath }, (err)=>{
         if(!err) {
           resolve();
@@ -471,24 +423,5 @@ module.exports = {
         });
       }
     });
-  },
-  getDisplaySettingsPath() {
-    return path.join(module.exports.getInstallDir(), "RiseDisplayNetworkII.ini");
-  },
-  updateDisplaySettings(newConfiguration) {
-    if (typeof newConfiguration != "object") {
-      throw new Error("Incorrect configuration type");
-    }
-    const configFile = module.exports.getDisplaySettingsPath();
-    const currentConfiguration = module.exports.parsePropertyList(module.exports.readTextFileSync(configFile));
-    const updatedConfiguration = Object.assign(currentConfiguration, newConfiguration);
-    const updatedConfigurationText = Object.keys(updatedConfiguration).reduce((acc, curr)=>{
-      if (updatedConfiguration[curr] != null) {
-        return acc + `${curr}=${updatedConfiguration[curr]}\n`;
-      } else {
-        return acc;
-      }
-    }, "");
-    return module.exports.writeTextFile(configFile, updatedConfigurationText);
   }
 };
