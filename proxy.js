@@ -17,6 +17,11 @@ module.exports = {
   setEndpoint(configObj) {
     if (!configObj) {return reset();}
 
+    // Recover from a bug that saved invalid configuration
+    if (configObj === "http:///:null") {
+      configObj = "";
+    }
+
     if (typeof configObj === "string") {
       configObj = urlParse(configObj);
     }
@@ -37,7 +42,7 @@ module.exports = {
     if (!configObj.href) {
       let authString = configObj.auth,
       port = configObj.port;
-      
+
       if (authString) {authString += "@"}
       if (port) {port = ":" + port}
 

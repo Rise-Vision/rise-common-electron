@@ -86,6 +86,12 @@ describe("proxy", ()=>{
     proxy.setEndpoint({hostname: ""});
     assert.equal(proxySetup.proxyFields.href, "http://");
   });
+
+  it("doesn't set http:///:null", ()=>{
+    proxy.setEndpoint("http:///:null");
+    assert.equal(proxySetup.proxyFields.href, "http://");
+  });
+
   it("sets endpoint from a string", ()=>{
     proxy.setEndpoint("http://u:p@test1234:80");
     assert.equal(proxySetup.proxyFields.hostname, "test1234");
