@@ -1,6 +1,5 @@
 var platform = require("../../platform.js"),
 childProcess = require("child_process"),
-os = require("os"),
 fs = require("fs-extra"),
 ws = require("windows-shortcuts"),
 assert = require("assert"),
@@ -30,26 +29,6 @@ describe("platform", ()=>{
     assert(platform.getViewerUrl());
   });
 
-  it("returns a valid name for Windows installer name", ()=>{
-    mock(platform, "isWindows").returnWith(true);
-    assert(platform.getInstallerName());
-  });
-
-  it("returns a valid name for Linux installer name", ()=>{
-    mock(platform, "isWindows").returnWith(false);
-    assert(platform.getInstallerName());
-  });
-
-  it("returns a valid name for old Windows installer name", ()=>{
-    mock(platform, "isWindows").returnWith(true);
-    assert(platform.getOldInstallerName());
-  });
-
-  it("returns a valid name for old Linux installer name", ()=>{
-    mock(platform, "isWindows").returnWith(false);
-    assert(platform.getOldInstallerName());
-  });
-
   it("gets Ubuntu version", ()=>{
     mock(childProcess, "spawnSync").returnWith({ stdout: {} });
 
@@ -58,14 +37,6 @@ describe("platform", ()=>{
     assert(childProcess.spawnSync.called);
     assert.equal(childProcess.spawnSync.lastCall.args[0], "lsb_release");
     assert.equal(childProcess.spawnSync.lastCall.args[1][0], "-sr");
-  });
-
-  it("gets temporary directory", ()=>{
-    mock(os, "tmpdir").returnWith("temp");
-
-    platform.getTempDir();
-
-    assert(os.tmpdir.called);
   });
 
   it("waits for 100ms to resolve the promise", ()=>{
@@ -381,26 +352,6 @@ describe("platform", ()=>{
     });
   });
 
-  it("executes a function that returns a promise on first run", ()=>{
-    mock(platform, "isFirstRun").returnWith(true);
-
-    return Promise.resolve()
-    .then(platform.onFirstRun(()=>{return Promise.resolve(true);}))
-    .then((itRan)=> {
-      assert.ok(itRan);
-    });
-  });
-
-  it("does not execute a function on other runs", ()=>{
-    mock(platform, "isFirstRun").returnWith(false);
-
-    return Promise.resolve()
-    .then(platform.onFirstRun(()=>{return Promise.resolve(true);}))
-    .then((itRan)=> {
-      assert.ok(!itRan);
-    });
-  });
-
   it("creates a shortcut on Windows", ()=>{
     mock(ws, "create").callbackWith();
 
@@ -503,39 +454,5 @@ describe("platform", ()=>{
     .catch((err)=>{
       assert.equal(err, "error");
     });
-  });
-
-  it("returns display settings file path", ()=>{
-    var displaySettingsPath;
-    mock(platform, "getInstallDir").returnWith("root");
-    displaySettingsPath = platform.getDisplaySettingsPath();
-    assert.equal(displaySettingsPath, "root/RiseDisplayNetworkII.ini");
-  });
-
-  describe("updateDisplaySettings", ()=>{
-    beforeEach(()=>{
-      mock(platform, "writeTextFile").resolveWith();
-      mock(platform, "readTextFileSync").returnWith("existing=data");
-    });
-
-    it("writes to RDNII", ()=>{
-      return platform.updateDisplaySettings({}).then(()=>{
-        assert(platform.writeTextFile.called);
-        assert(/rvplayer\/RiseDisplayNetworkII.ini$/.test(platform.writeTextFile.calls[0].args[0]));
-      });
-    });
-
-    it("writes new properties", ()=>{
-      return platform.updateDisplaySettings({new: "data"}).then(()=>{
-        assert(/new=data/.test(platform.writeTextFile.calls[0].args[1]));
-      });
-    });
-
-    it("preserves existing data", ()=>{
-      return platform.updateDisplaySettings({new: "data"}).then (()=>{
-        assert(/existing=data/.test(platform.writeTextFile.calls[0].args[1]));
-      });
-    });
-
   });
 });
