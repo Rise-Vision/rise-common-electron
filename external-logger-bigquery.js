@@ -28,19 +28,16 @@ module.exports = (systemOS, systemArch, installerVersion, osDesc)=>{
 
       var data = {
         event: eventName,
+        event_details: eventDetails || "",
         display_id: displaySettings.displayid || displaySettings.tempdisplayid,
         installer_version: installerVersion,
         os: os,
         ts: nowDate.toISOString()
       };
 
-      if (eventDetails) {
-        data.event_details = eventDetails;
-      }
-
       return bqClient.insert("events" + mod.getDateForTableName(nowDate), data, nowDate)
       .catch(e=>{
-        log.file("Could not log to bq " + require("util").inspect(e));
+        log.file("Could not log to bq " + require("util").inspect(e, { depth: null }));
       });
     }
   };

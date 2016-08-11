@@ -46,11 +46,19 @@ module.exports = (projectName, dataSetName, refreshUrl)=>{
         row.insertId = Math.random().toString(36).substr(2).toUpperCase();
         row.json = data;
 
-        insertData = JSON.stringify(insertData);
         return network.httpFetch(serviceUrl, {
           method: "POST",
           headers,
-          body: insertData
+          body: JSON.stringify(insertData)
+        })
+        .then((res)=>{
+          return res.json();
+        })
+        .then((json)=>{
+          if(!json.insertErrors || json.insertErrors.length === 0)
+            return Promise.resolve();
+          else
+            return Promise.reject(json.insertErrors);
         });
       });
     }
