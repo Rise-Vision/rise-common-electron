@@ -8,8 +8,7 @@ bqClient;
 describe("bigquery client", function() {
   beforeEach("setup", ()=> {
     simple.mock(network, "httpFetch")
-      .resolveWith({json() {return Promise.resolve({access_token: "test-token"});}})
-      .resolveWith({});
+      .resolveWith({json() {return Promise.resolve({access_token: "test-token"});}});
 
     bqClient = require("../../bq-client.js")("client-side-events", "Installer_Events");
   });
