@@ -451,8 +451,36 @@ describe("platform", ()=>{
     mock(childProcess, "exec").callbackWith("error");
 
     return platform.getFreeDiskSpace()
-    .catch((err)=>{
-      assert.equal(err, "error");
-    });
+      .catch((err)=>{
+        assert.equal(err, "error");
+      });
+  });
+
+  it("runs a promise without retries", ()=>{
+    var stub = simpleMock.stub().resolveWith();
+
+    return platform.runPromise(stub, 3)
+      .then(()=>{
+        assert.equal(stub.callCount, 1);
+      });
+  });
+
+  it("runs a promise succesfully after one retry (plus the original call)", ()=>{
+    var stub = simpleMock.stub().rejectWith().rejectWith().resolveWith();
+
+    return platform.runPromise(stub, 3)
+      .then(()=>{
+        assert.equal(stub.callCount, 3);
+      });
+  });
+
+  it("runs a promise and does not succeed after three retries", ()=>{
+    var stub = simpleMock.stub().rejectWith().rejectWith().rejectWith().rejectWith("err3");
+
+    return platform.runPromise(stub, 3)
+      .catch((err)=>{
+        assert.equal(stub.callCount, 4);
+        assert.equal(err, "err3");
+      });
   });
 });

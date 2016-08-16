@@ -423,5 +423,16 @@ module.exports = {
         });
       }
     });
+  },
+  runPromise(promise, retries) {
+    return promise()
+      .catch((err)=>{
+        if(retries > 0) {
+          return module.exports.runPromise(promise, retries - 1);
+        }
+        else {
+          return Promise.reject(err);
+        }
+      });
   }
 };
