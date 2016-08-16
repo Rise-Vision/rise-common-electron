@@ -1,18 +1,10 @@
 "use strict";
 var assert = require("assert"),
-extlogger = requireRoot("logger/bigquery/external-logger-bigquery.js")
-(requireRoot("common/network.js"));
-
-global.log = requireRoot("logger/logger.js")();
+extlogger = require("../../external-logger-bigquery.js")
+("testos", "testarch", "testversion", "testosdescription");
 
 describe("external logger bigquery", function() {
   it("logs to bigquery", function() {
-    return extlogger.log("testEvent", "testId", "testVersion", "testDetails")
-    .then(resp=>{
-      return resp.json();
-    })
-    .then(json=>{
-      assert.ok(json.kind === "bigquery#tableDataInsertAllResponse");
-    });
+    return extlogger.log("testEventName", "testDetails");
   });
 });

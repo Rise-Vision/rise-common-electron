@@ -1,13 +1,10 @@
-module.exports = (network, systemOS, systemArch, installerVersion, osDesc)=>{
-  var config = require("./config.json"),
-  refreshDate = 0,
-  token = "",
+module.exports = (systemOS, systemArch, installerVersion, osDesc)=>{
+  var bqClient = require("./bq-client.js")("client-side-events", "Installer_Events"),
   displaySettings = {},
   os = osDesc || (systemOS + " " + systemArch);
 
   function getDateForTableName(nowDate) {
-    var date = nowDate,
-    year = nowDate.getUTCFullYear(),
+    var year = nowDate.getUTCFullYear(),
     month = nowDate.getUTCMonth() + 1,
     day = nowDate.getUTCDate();
 
@@ -17,22 +14,9 @@ module.exports = (network, systemOS, systemArch, installerVersion, osDesc)=>{
     return "" + year + month + day;
   }
 
-  function refreshToken(nowDate) {
-    if (nowDate - refreshDate < 3580000) {
-      return Promise.resolve(token);
-    }
-
-    return network.httpFetch(config.refreshUrl, {method: "POST"})
-    .then(resp=>{return resp.json();})
-    .then(json=>{
-      refreshDate = nowDate;
-      token = json.access_token;
-    });
-  }
-
   var mod = {
     getDateForTableName,
-    refreshToken,
+    getBQClient() { return bqClient; },
     setDisplaySettings(settings) {
       displaySettings = settings;
     },
@@ -42,36 +26,18 @@ module.exports = (network, systemOS, systemArch, installerVersion, osDesc)=>{
         nowDate = new Date();
       }
 
-      return mod.refreshToken(nowDate).then(()=>{
-        var insertData = JSON.parse(JSON.stringify(config.insertSchema)),
-        row = insertData.rows[0],
-        serviceUrl,
-        headers; 
+      var data = {
+        event: eventName,
+        event_details: eventDetails || "",
+        display_id: displaySettings.displayid || displaySettings.tempdisplayid,
+        installer_version: installerVersion,
+        os: os,
+        ts: nowDate.toISOString()
+      };
 
-        serviceUrl = config.serviceUrl.replace
-        ("TABLE_ID", "events" + mod.getDateForTableName(nowDate));
-
-        headers = {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + token
-        };
-
-        row.insertId = Math.random().toString(36).substr(2).toUpperCase();
-        row.json.event = eventName;
-        row.json.display_id = displaySettings.displayid || displaySettings.tempdisplayid;
-        row.json.installer_version = installerVersion;
-        row.json.os = os;
-        if (eventDetails) {row.json.event_details = eventDetails;}
-        row.json.ts = nowDate.toISOString();
-        insertData = JSON.stringify(insertData);
-        return network.httpFetch(serviceUrl, {
-          method: "POST",
-          headers,
-          body: insertData
-        });
-      })
+      return bqClient.insert("events" + mod.getDateForTableName(nowDate), data, nowDate)
       .catch(e=>{
-        log.file("Could not log to bq " + require("util").inspect(e));
+        log.file("Could not log to bq " + require("util").inspect(e, { depth: null }));
       });
     }
   };
