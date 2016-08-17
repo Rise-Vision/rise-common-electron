@@ -519,4 +519,16 @@ describe("platform", ()=>{
         assert.equal(err[2], "function call timed out");
       });
   });
+
+  it("checks the retryDelay is used", ()=>{
+    var stub = simpleMock.stub().rejectWith("err1").rejectWith("err2").rejectWith("err3").rejectWith("err4");
+    var start = Date.now();
+
+    return platform.runFunction(stub, 3, null, 50)
+      .catch((err)=>{
+        assert.equal(stub.callCount, 4);
+        assert.equal(err.toString(), [ "err1", "err2", "err3", "err4" ].toString());
+        assert(Date.now() - start >= 150);
+      });
+  });
 });

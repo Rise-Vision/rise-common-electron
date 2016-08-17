@@ -424,7 +424,7 @@ module.exports = {
       }
     });
   },
-  runFunction(func, retryCount, retryTimeout) {
+  runFunction(func, retryCount, retryTimeout, retryDelay) {
     if(typeof(func) !== "function") {
       return Promise.reject(["func should be a function"]);
     }
@@ -457,7 +457,9 @@ module.exports = {
             reject(errors);
           }
           else {
-            internalRun(retries - 1);
+            setTimeout(()=>{
+              internalRun(retries - 1);
+            }, retryDelay || 0);
           }
         }
 
