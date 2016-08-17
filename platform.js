@@ -424,15 +424,49 @@ module.exports = {
       }
     });
   },
-  runPromise(promise, retries) {
-    return promise()
-      .catch((err)=>{
-        if(retries > 0) {
-          return module.exports.runPromise(promise, retries - 1);
+  runFunction(func, retryCount, retryTimeout) {
+    if(typeof(func) !== "function") {
+      return Promise.reject(["func should be a function"]);
+    }
+
+    return new Promise((resolve, reject)=>{
+      var errors = [];
+
+      internalRun(retryCount);
+
+      function internalRun(retries) {
+        var timer;
+
+        if(retryTimeout) {
+          timer = setTimeout(()=>{
+            handleError("function call timed out");
+          }, retryTimeout);
         }
-        else {
-          return Promise.reject(err);
+
+        func()
+          .then(clearTimer)
+          .then(resolve)
+          .catch(handleError);
+
+        function handleError(err) {
+          clearTimer();
+
+          errors.push(err);
+
+          if(retries === 0) {
+            reject(errors);
+          }
+          else {
+            internalRun(retries - 1);
+          }
         }
-      });
+
+        function clearTimer() {
+          if(timer) {
+            clearTimeout(timer);
+          }
+        }
+      }
+    });
   }
 };

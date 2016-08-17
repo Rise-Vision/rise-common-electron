@@ -459,28 +459,64 @@ describe("platform", ()=>{
   it("runs a promise without retries", ()=>{
     var stub = simpleMock.stub().resolveWith();
 
-    return platform.runPromise(stub, 3)
+    return platform.runFunction(stub, 2)
       .then(()=>{
         assert.equal(stub.callCount, 1);
       });
   });
 
   it("runs a promise succesfully after one retry (plus the original call)", ()=>{
-    var stub = simpleMock.stub().rejectWith().rejectWith().resolveWith();
+    var stub = simpleMock.stub().rejectWith().resolveWith();
 
-    return platform.runPromise(stub, 3)
+    return platform.runFunction(stub, 2)
       .then(()=>{
-        assert.equal(stub.callCount, 3);
+        assert.equal(stub.callCount, 2);
       });
   });
 
-  it("runs a promise and does not succeed after three retries", ()=>{
-    var stub = simpleMock.stub().rejectWith().rejectWith().rejectWith().rejectWith("err3");
+  it("runs a promise and does not succeed after two retries (plus the original call)", ()=>{
+    var stub = simpleMock.stub().rejectWith("err1").rejectWith("err2").rejectWith("err3");
 
-    return platform.runPromise(stub, 3)
+    return platform.runFunction(stub, 2)
       .catch((err)=>{
-        assert.equal(stub.callCount, 4);
-        assert.equal(err, "err3");
+        assert.equal(stub.callCount, 3);
+        assert.equal(err.toString(), [ "err1", "err2", "err3" ].toString());
+      });
+  });
+
+  it("runs a promise and it succeds on the first retry, after the first call times out", ()=>{
+    var promise = new Promise(()=>{});
+    var stub = simpleMock.stub().returnWith(promise).resolveWith();
+
+    return platform.runFunction(stub, 2, 20)
+      .then(()=>{
+        assert.equal(stub.callCount, 2);
+      });
+  });
+
+  it("runs a promise and it fails every retry because of time out", ()=>{
+    var promise = new Promise(()=>{});
+    var stub = simpleMock.stub().returnWith(promise).returnWith(promise).returnWith(promise);
+
+    return platform.runFunction(stub, 2, 20)
+      .catch((err)=>{
+        assert.equal(stub.callCount, 3);
+        assert.equal(err[0], "function call timed out");
+        assert.equal(err[1], "function call timed out");
+        assert.equal(err[2], "function call timed out");
+      });
+  });
+
+  it("runs a promise and it fails every retry because of errors and time outs", ()=>{
+    var promise = new Promise(()=>{});
+    var stub = simpleMock.stub().returnWith(promise).rejectWith("regular error").returnWith(promise);
+
+    return platform.runFunction(stub, 2, 20)
+      .catch((err)=>{
+        assert.equal(stub.callCount, 3);
+        assert.equal(err[0], "function call timed out");
+        assert.equal(err[1], "regular error");
+        assert.equal(err[2], "function call timed out");
       });
   });
 });
