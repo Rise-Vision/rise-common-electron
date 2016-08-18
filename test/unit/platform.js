@@ -456,6 +456,46 @@ describe("platform", ()=>{
       });
   });
 
+  it("it runs a function which resolves a promise and returns it", ()=>{
+    var stub = simpleMock.stub().resolveWith("res1");
+
+    return platform.runAsPromise(stub)
+      .then((res)=>{
+        assert.equal(stub.callCount, 1);
+        assert.equal(res, "res1");
+      });
+  });
+
+  it("it runs a function which rejects a promise and returns it", ()=>{
+    var stub = simpleMock.stub().rejectWith("rej1");
+
+    return platform.runAsPromise(stub)
+      .catch((err)=>{
+        assert.equal(stub.callCount, 1);
+        assert.equal(err, "rej1");
+      });
+  });
+
+  it("it runs a function which returns a value and returns a resolved promise", ()=>{
+    var stub = simpleMock.stub().returnWith("res1");
+
+    return platform.runAsPromise(stub)
+      .then((res)=>{
+        assert.equal(stub.callCount, 1);
+        assert.equal(res, "res1");
+      });
+  });
+
+  it("it runs a function which throws an exception and returns a rejected promise", ()=>{
+    var stub = simpleMock.stub().throwWith("rej1");
+
+    return platform.runAsPromise(stub)
+      .catch((err)=>{
+        assert.equal(stub.callCount, 1);
+        assert.equal(err, "rej1");
+      });
+  });
+
   it("runs a promise without retries", ()=>{
     var stub = simpleMock.stub().resolveWith();
 

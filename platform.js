@@ -424,6 +424,21 @@ module.exports = {
       }
     });
   },
+  runAsPromise(func) {
+    try {
+      var res = func();
+
+      if(res.then || res.catch) {
+        return res;
+      }
+      else {
+        return Promise.resolve(res);
+      }
+    }
+    catch(err) {
+      return Promise.reject(err);
+    }
+  },
   runFunction(func, retryCount, retryTimeout, retryDelay) {
     if(typeof(func) !== "function") {
       return Promise.reject(["func should be a function"]);
@@ -443,7 +458,7 @@ module.exports = {
           }, retryTimeout);
         }
 
-        func()
+        module.exports.runAsPromise(func)
           .then(clearTimer)
           .then(resolve.bind(null, errors))
           .catch(handleError);
