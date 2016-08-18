@@ -423,5 +423,67 @@ module.exports = {
         });
       }
     });
+  },
+  runAsPromise(func) {
+    try {
+      var res = func();
+
+      if(res.then || res.catch) {
+        return res;
+      }
+      else {
+        return Promise.resolve(res);
+      }
+    }
+    catch(err) {
+      return Promise.reject(err);
+    }
+  },
+  runFunction(func, retryCount, retryTimeout, retryDelay) {
+    if(typeof(func) !== "function") {
+      return Promise.reject(["func should be a function"]);
+    }
+
+    return new Promise((resolve, reject)=>{
+      var errors = [];
+
+      internalRun(retryCount);
+
+      function internalRun(retries) {
+        var timer;
+
+        if(retryTimeout) {
+          timer = setTimeout(()=>{
+            handleError("function call timed out");
+          }, retryTimeout);
+        }
+
+        module.exports.runAsPromise(func)
+          .then(clearTimer)
+          .then(resolve.bind(null, errors))
+          .catch(handleError);
+
+        function handleError(err) {
+          clearTimer();
+
+          errors.push(err);
+
+          if(retries === 0) {
+            reject(errors);
+          }
+          else {
+            setTimeout(()=>{
+              internalRun(retries - 1);
+            }, retryDelay || 0);
+          }
+        }
+
+        function clearTimer() {
+          if(timer) {
+            clearTimeout(timer);
+          }
+        }
+      }
+    });
   }
 };

@@ -451,8 +451,127 @@ describe("platform", ()=>{
     mock(childProcess, "exec").callbackWith("error");
 
     return platform.getFreeDiskSpace()
-    .catch((err)=>{
-      assert.equal(err, "error");
-    });
+      .catch((err)=>{
+        assert.equal(err, "error");
+      });
+  });
+
+  it("it runs a function which resolves a promise and returns it", ()=>{
+    var stub = simpleMock.stub().resolveWith("res1");
+
+    return platform.runAsPromise(stub)
+      .then((res)=>{
+        assert.equal(stub.callCount, 1);
+        assert.equal(res, "res1");
+      });
+  });
+
+  it("it runs a function which rejects a promise and returns it", ()=>{
+    var stub = simpleMock.stub().rejectWith("rej1");
+
+    return platform.runAsPromise(stub)
+      .catch((err)=>{
+        assert.equal(stub.callCount, 1);
+        assert.equal(err, "rej1");
+      });
+  });
+
+  it("it runs a function which returns a value and returns a resolved promise", ()=>{
+    var stub = simpleMock.stub().returnWith("res1");
+
+    return platform.runAsPromise(stub)
+      .then((res)=>{
+        assert.equal(stub.callCount, 1);
+        assert.equal(res, "res1");
+      });
+  });
+
+  it("it runs a function which throws an exception and returns a rejected promise", ()=>{
+    var stub = simpleMock.stub().throwWith("rej1");
+
+    return platform.runAsPromise(stub)
+      .catch((err)=>{
+        assert.equal(stub.callCount, 1);
+        assert.equal(err, "rej1");
+      });
+  });
+
+  it("runs a promise without retries", ()=>{
+    var stub = simpleMock.stub().resolveWith();
+
+    return platform.runFunction(stub, 2)
+      .then((errors)=>{
+        assert.equal(stub.callCount, 1);
+        assert.equal(errors.length, 0);
+      });
+  });
+
+  it("runs a promise succesfully after one retry (plus the original call)", ()=>{
+    var stub = simpleMock.stub().rejectWith("err1").resolveWith();
+
+    return platform.runFunction(stub, 2)
+      .then((errors)=>{
+        assert.equal(stub.callCount, 2);
+        assert.equal(errors.toString(), [ "err1" ].toString());
+      });
+  });
+
+  it("runs a promise and does not succeed after two retries (plus the original call)", ()=>{
+    var stub = simpleMock.stub().rejectWith("err1").rejectWith("err2").rejectWith("err3");
+
+    return platform.runFunction(stub, 2)
+      .catch((err)=>{
+        assert.equal(stub.callCount, 3);
+        assert.equal(err.toString(), [ "err1", "err2", "err3" ].toString());
+      });
+  });
+
+  it("runs a promise and it succeds on the first retry, after the first call times out", ()=>{
+    var promise = new Promise(()=>{});
+    var stub = simpleMock.stub().returnWith(promise).resolveWith();
+
+    return platform.runFunction(stub, 2, 20)
+      .then((errors)=>{
+        assert.equal(stub.callCount, 2);
+        assert.equal(errors.toString(), [ "function call timed out" ].toString());
+      });
+  });
+
+  it("runs a promise and it fails every retry because of time out", ()=>{
+    var promise = new Promise(()=>{});
+    var stub = simpleMock.stub().returnWith(promise).returnWith(promise).returnWith(promise);
+
+    return platform.runFunction(stub, 2, 20)
+      .catch((err)=>{
+        assert.equal(stub.callCount, 3);
+        assert.equal(err[0], "function call timed out");
+        assert.equal(err[1], "function call timed out");
+        assert.equal(err[2], "function call timed out");
+      });
+  });
+
+  it("runs a promise and it fails every retry because of errors and time outs", ()=>{
+    var promise = new Promise(()=>{});
+    var stub = simpleMock.stub().returnWith(promise).rejectWith("regular error").returnWith(promise);
+
+    return platform.runFunction(stub, 2, 20)
+      .catch((err)=>{
+        assert.equal(stub.callCount, 3);
+        assert.equal(err[0], "function call timed out");
+        assert.equal(err[1], "regular error");
+        assert.equal(err[2], "function call timed out");
+      });
+  });
+
+  it("checks the retryDelay is used", ()=>{
+    var stub = simpleMock.stub().rejectWith("err1").rejectWith("err2").rejectWith("err3").rejectWith("err4");
+    var start = Date.now();
+
+    return platform.runFunction(stub, 3, null, 50)
+      .catch((err)=>{
+        assert.equal(stub.callCount, 4);
+        assert.equal(err.toString(), [ "err1", "err2", "err3", "err4" ].toString());
+        assert(Date.now() - start >= 150);
+      });
   });
 });
