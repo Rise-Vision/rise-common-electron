@@ -445,7 +445,7 @@ module.exports = {
 
         func()
           .then(clearTimer)
-          .then(resolve)
+          .then(resolve.bind(null, errors))
           .catch(handleError);
 
         function handleError(err) {

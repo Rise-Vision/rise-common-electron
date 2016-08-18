@@ -460,17 +460,19 @@ describe("platform", ()=>{
     var stub = simpleMock.stub().resolveWith();
 
     return platform.runFunction(stub, 2)
-      .then(()=>{
+      .then((errors)=>{
         assert.equal(stub.callCount, 1);
+        assert.equal(errors.length, 0);
       });
   });
 
   it("runs a promise succesfully after one retry (plus the original call)", ()=>{
-    var stub = simpleMock.stub().rejectWith().resolveWith();
+    var stub = simpleMock.stub().rejectWith("err1").resolveWith();
 
     return platform.runFunction(stub, 2)
-      .then(()=>{
+      .then((errors)=>{
         assert.equal(stub.callCount, 2);
+        assert.equal(errors.toString(), [ "err1" ].toString());
       });
   });
 
@@ -489,8 +491,9 @@ describe("platform", ()=>{
     var stub = simpleMock.stub().returnWith(promise).resolveWith();
 
     return platform.runFunction(stub, 2, 20)
-      .then(()=>{
+      .then((errors)=>{
         assert.equal(stub.callCount, 2);
+        assert.equal(errors.toString(), [ "function call timed out" ].toString());
       });
   });
 
