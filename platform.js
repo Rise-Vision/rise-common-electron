@@ -468,7 +468,7 @@ module.exports = {
 
           errors.push(err);
 
-          if(retries === 0) {
+          if(retries <= 0) {
             reject(errors);
           }
           else {
