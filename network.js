@@ -11,6 +11,7 @@ javaProxyArgs = [],
 url = require("url"),
 path = require("path"),
 fs = require("fs"),
+os = require("os"),
 downloadStats = {},
 observers = [],
 proxyFields = null,
@@ -165,18 +166,26 @@ module.exports = {
   },
   getLocalIP() {
     return new Promise((res)=> {
-      var s = net.createConnection(80, "www.google.com", ()=>{
-        res(s.localAddress);
-        s.destroy();
-      });
-      s.on("error", ()=>res(null));
-      s.setTimeout(5000, ()=>{
-        s.destroy();
+      var addresses = [];
+
+      try {
+        var interfaces = os.networkInterfaces();
+        for (var k in interfaces) {
+          for (var k2 in interfaces[k]) {
+            var address = interfaces[k][k2];
+            if (address.family === 'IPv4' && !address.internal) {
+              addresses.push(address.address);
+            }
+          }
+        }
+
+        res(addresses.length === 0 ? null : addresses.join(","));
+      }
+      catch (err) {
         res(null);
-      });
+      }
     });
   },
-
   registerObserver(fn) {
     observers.push(fn);
   },
