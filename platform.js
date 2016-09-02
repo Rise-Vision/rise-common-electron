@@ -245,6 +245,7 @@ module.exports = {
     log.debug("writing sync " + filePath);
 
     try {
+      mkdirp.sync(path.dirname(filePath));
       fs.writeFileSync(filePath, data);
     }
     catch (err) {
