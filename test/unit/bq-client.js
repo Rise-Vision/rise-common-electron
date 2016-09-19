@@ -39,7 +39,7 @@ describe("bigquery client", function() {
   });
 
   it("makes the post call with template sufix", function() {
-    return bqClient.insert(testTableName, { event: "testEvent" }, "20160101")
+    return bqClient.insert(testTableName, { event: "testEvent" }, null, "20160101")
       .then(()=>{
       assert.ok(/datasets\/Installer_Events/.test(network.httpFetch.lastCall.args[0]));
     assert.ok(/tables\/events[0-9]{8}/.test(network.httpFetch.lastCall.args[0]));
@@ -75,7 +75,7 @@ describe("bigquery client", function() {
 
     return bqClient.insert(testTableName, { event: "testEvent" })
     .then(()=>{
-      return bqClient.insert(testTableName, { event: "testEvent" }, null, hourAhead);
+      return bqClient.insert(testTableName, { event: "testEvent" }, hourAhead);
     }).then(()=>{
       assert.equal(network.httpFetch.callCount, 4);
     });

@@ -20,7 +20,7 @@ module.exports = (projectName, dataSetName, refreshUrl)=>{
 
   var mod = {
     refreshToken,
-    insert(tableName, data, templateSuffix, nowDate) {
+    insert(tableName, data, nowDate, templateSuffix) {
       if (!projectName) {return Promise.reject("projectName is required");}
       if (!dataSetName) {return Promise.reject("dataSetName is required");}
       if (!tableName) {return Promise.reject("tableName is required");}
