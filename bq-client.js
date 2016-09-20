@@ -20,7 +20,7 @@ module.exports = (projectName, dataSetName, refreshUrl)=>{
 
   var mod = {
     refreshToken,
-    insert(tableName, data, nowDate) {
+    insert(tableName, data, nowDate, templateSuffix) {
       if (!projectName) {return Promise.reject("projectName is required");}
       if (!dataSetName) {return Promise.reject("dataSetName is required");}
       if (!tableName) {return Promise.reject("tableName is required");}
@@ -32,6 +32,10 @@ module.exports = (projectName, dataSetName, refreshUrl)=>{
         row = insertData.rows[0],
         serviceUrl,
         headers;
+
+        if (templateSuffix) {
+          insertData.templateSuffix = templateSuffix;
+        }
 
         serviceUrl = config.serviceUrl
           .replace("PROJECT_NAME", projectName)
