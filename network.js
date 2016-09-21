@@ -58,6 +58,9 @@ module.exports = {
 
     return module.exports.callFetch(dest, opts);
   },
+  getProxyAgents() {
+    return fetchAgents;
+  },
   getJavaProxyArgs() {
     return javaProxyArgs;
   },
