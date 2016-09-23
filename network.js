@@ -4,7 +4,6 @@ fetch = require("node-fetch"),
 http = require("http"),
 httpProxyAgent = require("http-proxy-agent"),
 httpsProxyAgent = require("https-proxy-agent"),
-net=require('net'),
 proxy = require("./proxy.js"),
 fetchAgents = {},
 javaProxyArgs = [],
@@ -41,14 +40,18 @@ function setNodeHttpAgent(fields) {
 }
 
 function setJavaProxyArgs(fields) {
-  if (!fields.hostname || !fields.port) {return (javaProxyArgs = []);}
-  javaProxyArgs = [
-    `-Dhttp.proxyHost=${fields.hostname}`,
-    `-Dhttp.proxyPort=${fields.port}`,
-    `-Dhttps.proxyHost=${fields.hostname}`,
-    `-Dhttps.proxyPort=${fields.port}`,
-    `-Dhttp.nonProxyHosts="10.*|192.168.*|0.0.*|localhost|127.*|[::1]"`
-  ];
+  if (!fields.hostname || !fields.port) {
+    javaProxyArgs = [];
+  }
+  else {
+    javaProxyArgs = [
+      `-Dhttp.proxyHost=${fields.hostname}`,
+      `-Dhttp.proxyPort=${fields.port}`,
+      `-Dhttps.proxyHost=${fields.hostname}`,
+      `-Dhttps.proxyPort=${fields.port}`,
+      `-Dhttp.nonProxyHosts="10.*|192.168.*|0.0.*|localhost|127.*|[::1]"`
+    ];
+  }
 }
 
 module.exports = {
