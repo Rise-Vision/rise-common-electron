@@ -2,8 +2,6 @@ var platform = require("./platform.js"),
 dns = require("dns"),
 fetch = require("node-fetch"),
 http = require("http"),
-httpProxyAgent = require("http-proxy-agent"),
-httpsProxyAgent = require("https-proxy-agent"),
 proxy = require("./proxy.js"),
 fetchAgents = {},
 javaProxyArgs = [],
@@ -21,23 +19,12 @@ const downloadTimeout = 1000 * 60 * 20;
 
 proxy.observe((fields)=>{
   proxyFields = fields;
-  setNodeHttpAgent(fields);
   setJavaProxyArgs(fields);
 
   proxyObservers.forEach((observer)=>{
     observer(fields);
   });
 });
-
-function setNodeHttpAgent(fields) {
-  log.debug("Setting proxy to " + JSON.stringify(fields));
-  if (!fields.hostname) {
-    fetchAgents = {};
-  } else {
-    fetchAgents.httpAgent = new httpProxyAgent(fields);
-    fetchAgents.httpsAgent = new httpsProxyAgent(fields);
-  }
-}
 
 function setJavaProxyArgs(fields) {
   if (!fields.hostname || !fields.port) {
@@ -55,6 +42,12 @@ function setJavaProxyArgs(fields) {
 }
 
 module.exports = {
+  setNodeAgents(httpAgent, httpsAgent) {
+    fetchAgents = {
+      httpAgent,
+      httpsAgent
+    };
+  },
   httpFetch(dest, opts) {
     let agent = dest.indexOf("https:") > -1 ? fetchAgents.httpsAgent : fetchAgents.httpAgent;
     opts = Object.assign({}, {agent}, opts);
