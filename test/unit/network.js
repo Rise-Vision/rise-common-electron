@@ -1,7 +1,6 @@
 var platform = require("../../platform.js"),
 network = require("../../network.js"),
 dns = require("dns"),
-proxy = require("../../proxy.js"),
 http = require("http"),
 path = require("path"),
 fs = require("fs"),
@@ -22,20 +21,6 @@ describe("network", ()=>{
 
   afterEach("clean mocks", ()=>{
     simpleMock.restore();
-  });
-
-  it("handles proxy changes", ()=>{
-    var resultingProxySetup,
-    proxySetup = {hostname: "127.0.0.1", port: 8888};
-
-    proxy.setEndpoint(proxySetup);
-    mock(network, "callFetch").resolveWith({});
-
-    return network.httpFetch("http://testdest.com")
-    .then(()=>{
-      resultingProxySetup = network.callFetch.calls[0].args[1].agent.proxy;
-      assert.equal(resultingProxySetup.hostname, proxySetup.hostname);
-    });
   });
 
   it("downloads a file using the given url", ()=>{
