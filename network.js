@@ -42,6 +42,7 @@ function setJavaProxyArgs(fields) {
 }
 
 module.exports = {
+  setJavaProxyArgs,
   setNodeAgents(httpAgent, httpsAgent) {
     fetchAgents = {
       httpAgent,
