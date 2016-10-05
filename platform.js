@@ -416,12 +416,12 @@ module.exports = {
         });
       }
       else {
-        var lnxCommand = "df --block-size=K --output=avail " + dir;
+        var lnxCommand = "df -k " + dir + " | awk 'NR==2 {print $4}'";
 
         childProcess.exec(lnxCommand, (err, stdout)=>{
           if(err) { reject(err); }
 
-          resolve(Number(stdout.replace("K", "").split("\n")[1]) * 1024);
+          resolve(Number(stdout) * 1024);
         });
       }
     });

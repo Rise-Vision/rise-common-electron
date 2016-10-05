@@ -13,8 +13,7 @@ var diskSpaceOutputWin =
 265906098176     `;
 
 var diskSpaceOutputLnx =
-`    Avail
-70538216K`;
+`70538216`;
 
 describe("platform", ()=>{
   beforeEach("setup mocks", ()=>{
@@ -411,7 +410,7 @@ describe("platform", ()=>{
     return platform.getFreeDiskSpace(dir)
     .then((space)=>{
       assert(childProcess.exec.called);
-      assert.equal(childProcess.exec.lastCall.args[0], "df --block-size=K --output=avail " + dir);
+      assert.equal(childProcess.exec.lastCall.args[0], "df -k " + dir + " | awk 'NR==2 {print $4}'");
       assert.equal(space, 72231133184);
     });
   });
@@ -426,7 +425,7 @@ describe("platform", ()=>{
     return platform.getFreeDiskSpace()
       .then((space)=>{
       assert(childProcess.exec.called);
-    assert.equal(childProcess.exec.lastCall.args[0], "df --block-size=K --output=avail " + installDir);
+    assert.equal(childProcess.exec.lastCall.args[0], "df -k " + installDir + " | awk 'NR==2 {print $4}'");
     assert.equal(space, 72231133184);
     });
   });
