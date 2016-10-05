@@ -400,6 +400,22 @@ describe("platform", ()=>{
     });
   });
 
+  it("returns free disk space with dir as parameter on linux", ()=>{
+    var installDir = "/home/rise/rvplayer";
+    var dir = "/home/rise/rvplayer/test";
+
+    mock(platform, "isWindows").returnWith(false);
+    mock(platform, "getInstallDir").returnWith(installDir);
+    mock(childProcess, "exec").callbackWith(null, diskSpaceOutputLnx);
+
+    return platform.getFreeDiskSpace(dir)
+    .then((space)=>{
+      assert(childProcess.exec.called);
+      assert.equal(childProcess.exec.lastCall.args[0], "df --block-size=K --output=avail " + dir);
+      assert.equal(space, 72231133184);
+    });
+  });
+
   it("returns free disk space on Linux", ()=>{
     var installDir = "/home/rise/rvplayer";
 
@@ -408,10 +424,10 @@ describe("platform", ()=>{
     mock(childProcess, "exec").callbackWith(null, diskSpaceOutputLnx);
 
     return platform.getFreeDiskSpace()
-    .then((space)=>{
+      .then((space)=>{
       assert(childProcess.exec.called);
-      assert.equal(childProcess.exec.lastCall.args[0], "df --block-size=K --output=avail " + installDir);
-      assert.equal(space, 72231133184);
+    assert.equal(childProcess.exec.lastCall.args[0], "df --block-size=K --output=avail " + installDir);
+    assert.equal(space, 72231133184);
     });
   });
 

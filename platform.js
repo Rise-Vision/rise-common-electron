@@ -403,10 +403,11 @@ module.exports = {
 
     return module.exports.spawn(command, args);
   },
-  getFreeDiskSpace() {
+  getFreeDiskSpace(dir) {
     return new Promise((resolve, reject)=>{
+      dir = (dir) ? dir : module.exports.getInstallDir();
       if(module.exports.isWindows()) {
-        var winCommand = "wmic LogicalDisk Where \"Name='DRIVE:'\" GET FreeSpace".replace("DRIVE", module.exports.getInstallDir().substr(0, 1));
+        var winCommand = "wmic LogicalDisk Where \"Name='DRIVE:'\" GET FreeSpace".replace("DRIVE", dir.substr(0, 1));
 
         childProcess.exec(winCommand, (err, stdout)=>{
           if(err) { reject(err); }
@@ -415,7 +416,7 @@ module.exports = {
         });
       }
       else {
-        var lnxCommand = "df --block-size=K --output=avail " + module.exports.getInstallDir();
+        var lnxCommand = "df --block-size=K --output=avail " + dir;
 
         childProcess.exec(lnxCommand, (err, stdout)=>{
           if(err) { reject(err); }
