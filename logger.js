@@ -35,10 +35,14 @@ module.exports = (externalLogger, logFolder)=> {
     }
   }
 
-  function resetLogFiles() {
+  function resetLogFiles(maxSize=0) {
     try {
       ["installer-events.log","installer-detail.log"]
-      .forEach(str=>fs.truncate(path.join(logFolder, str)));
+      .forEach((str)=>{
+        let filePath = path.join(logFolder, str);
+        if (fs.statSync(filePath).size < maxSize) {return;}
+        fs.truncate(filePath);
+      });
     } catch(e) {console.log(e.stack);}
   }
 
