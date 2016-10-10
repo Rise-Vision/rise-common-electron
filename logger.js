@@ -35,6 +35,13 @@ module.exports = (externalLogger, logFolder)=> {
     }
   }
 
+  function resetLogFiles() {
+    try {
+      ["installer-events.log","installer-detail.log"]
+      .forEach(str=>fs.truncate(path.join(logFolder, str)));
+    } catch(e) {console.log(e.stack);}
+  }
+
   function appendToLog(detail, userFriendlyMessage) {
     // Do not attempt to write logs on test cases
     if(!process.versions.electron) return;
@@ -103,6 +110,7 @@ module.exports = (externalLogger, logFolder)=> {
     },
     progress(msg, pct) {
       if (validUiWindow()) {uiWindow.send("set-progress", {msg, pct});}
-    }
+    },
+    resetLogFiles
   };
 };

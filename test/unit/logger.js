@@ -2,9 +2,29 @@ var log,
 uiWindow,
 externalLogger,
 fs = require("fs"),
+path = require("path"),
 assert = require("assert"),
 simpleMock = require("simple-mock"),
 mock = require("simple-mock").mock;
+
+describe("Logger", ()=>{
+  afterEach("clean mocks", ()=>{
+    simpleMock.restore();
+  });
+
+  it("resets log files", ()=>{
+    simpleMock.mock(fs, "truncate").returnWith();
+    require("../../logger.js")({}, "installDir").resetLogFiles();
+    assert(fs.truncate.calls[0].args[0].includes(path.join("installDir", "installer-events")));
+    assert(fs.truncate.calls[1].args[0].includes(path.join("installDir", "installer-detail")));
+  });
+
+  it("handles failed attempt to reset log files", ()=>{
+    simpleMock.mock(fs, "truncate").throwWith(new Error("test-truncate-failure"));
+    require("../../logger.js")({}, "installDir").resetLogFiles();
+    assert(fs.truncate.calls[0].args[0].includes(path.join("installDir", "installer-events")));
+  });
+});
 
 describe("launcher", ()=>{
   beforeEach("setup mocks", ()=>{
