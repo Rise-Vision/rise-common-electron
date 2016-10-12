@@ -43,7 +43,7 @@ module.exports = (externalLogger, logFolder)=> {
         if (fs.statSync(filePath).size < maxSize) {return;}
         fs.truncate(filePath);
       });
-    } catch(e) {console.log(e.stack);}
+    } catch(e) {debug(e.stack);}
   }
 
   function appendToLog(detail, userFriendlyMessage) {
