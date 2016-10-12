@@ -179,7 +179,7 @@ module.exports = {
           }
         }
 
-        res(addresses.length === 0 ? null : addresses.join(","));
+        res(addresses.length === 0 ? null : addresses[0]);
       }
       catch (err) {
         res(null);
