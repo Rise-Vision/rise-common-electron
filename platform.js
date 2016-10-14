@@ -249,7 +249,7 @@ module.exports = {
       fs.writeFileSync(filePath, data);
     }
     catch (err) {
-      log.debug(`Error writing file sync ${err}`);
+      log.file(`Error writing file sync ${err}`);
     }
   },
   copyFolderRecursive(source, target) {
