@@ -1,4 +1,5 @@
 var platform = require("../../platform.js"),
+path = require("path"),
 childProcess = require("child_process"),
 fs = require("fs-extra"),
 ws = require("windows-shortcuts"),
@@ -7,6 +8,7 @@ simpleMock = require("simple-mock"),
 mock = require("simple-mock").mock;
 
 global.messages = {};
+global.log = global.log || {file: simpleMock.stub(), error:simpleMock.stub(), debug: simpleMock.stub()};
 
 var diskSpaceOutputWin =
 `FreeSpace
@@ -416,16 +418,13 @@ describe("platform", ()=>{
   });
 
   it("returns free disk space on Linux", ()=>{
-    var installDir = "/home/rise/rvplayer";
-
     mock(platform, "isWindows").returnWith(false);
-    mock(platform, "getInstallDir").returnWith(installDir);
     mock(childProcess, "exec").callbackWith(null, diskSpaceOutputLnx);
 
     return platform.getFreeDiskSpace()
       .then((space)=>{
       assert(childProcess.exec.called);
-    assert.equal(childProcess.exec.lastCall.args[0], "df -k " + installDir + " | awk 'NR==2 {print $4}'");
+    assert.equal(childProcess.exec.lastCall.args[0], "df -k " + path.join(__dirname, "..", "..") + " | awk 'NR==2 {print $4}'");
     assert.equal(space, 72231133184);
     });
   });
@@ -444,16 +443,13 @@ describe("platform", ()=>{
   });
 
   it("returns free disk space on Windows", ()=>{
-    var installDir = "C:\\Users\\rise\\AppData\\Local\\rvplayer";
-
     mock(platform, "isWindows").returnWith(true);
-    mock(platform, "getInstallDir").returnWith(installDir);
     mock(childProcess, "exec").callbackWith(null, diskSpaceOutputWin);
 
     return platform.getFreeDiskSpace()
     .then((space)=>{
       assert(childProcess.exec.called);
-      assert.equal(childProcess.exec.lastCall.args[0], "wmic LogicalDisk Where \"Name='C:'\" GET FreeSpace");
+      assert.equal(childProcess.exec.lastCall.args[0], `wmic LogicalDisk Where "Name='${__dirname.substr(0,1)}:'" GET FreeSpace`);
       assert.equal(space, 265906098176);
     });
   });
