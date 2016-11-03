@@ -403,7 +403,7 @@ module.exports = {
 
     return module.exports.spawn(command, args);
   },
-  getFreeDiskSpace(dir=module.exports.getInstallDir()) {
+  getFreeDiskSpace(dir=__dirname) {
     return new Promise((resolve, reject)=>{
       if(module.exports.isWindows()) {
         var winCommand = "wmic LogicalDisk Where \"Name='DRIVE:'\" GET FreeSpace".replace("DRIVE", dir.substr(0, 1));
