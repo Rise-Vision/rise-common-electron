@@ -41,6 +41,12 @@ function setJavaProxyArgs(fields) {
   }
 }
 
+function setRequestAgent(dest, opts) {
+  let agent = dest.indexOf("https:") > -1 ? fetchAgents.httpsAgent : fetchAgents.httpAgent;
+
+  return Object.assign({}, {agent}, opts);
+}
+
 module.exports = {
   setJavaProxyArgs,
   setNodeAgents(httpAgent, httpsAgent) {
@@ -50,10 +56,7 @@ module.exports = {
     };
   },
   httpFetch(dest, opts) {
-    let agent = dest.indexOf("https:") > -1 ? fetchAgents.httpsAgent : fetchAgents.httpAgent;
-    opts = Object.assign({}, {agent}, opts);
-
-    return module.exports.callFetch(dest, opts);
+    return module.exports.callFetch(dest, setRequestAgent(dest, opts));
   },
   getProxyAgents() {
     return fetchAgents;
@@ -86,6 +89,7 @@ module.exports = {
 
     function tryDownload(downloadUrl) {
       var file = fs.createWriteStream(savePath);
+      var opts = url.parse(downloadUrl);
 
       downloadStats[originalUrl].tries += 1;
 
@@ -95,7 +99,7 @@ module.exports = {
 
       log.debug("Downloading " + originalUrl + " try " + downloadStats[originalUrl].tries);
 
-      var req = http.get(downloadUrl, (res)=>{
+      var req = http.get(setRequestAgent(downloadUrl, opts), (res)=>{
         if (isRedirect(res.statusCode)) {
           if (downloadStats[originalUrl].tries === maxRetries) {
             reject({message: "Too many download attempts"});

@@ -36,6 +36,9 @@ describe("network", ()=>{
 
     return network.downloadFile("http://install-versions.risevision.com/RiseCache.zip", path.join("providedTestPath", "RiseCache.zip"))
     .then((localPath)=>{
+      assert.equal(http.get.lastCall.args[0].protocol, "http:");
+      assert.equal(http.get.lastCall.args[0].hostname, "install-versions.risevision.com");
+      assert.equal(http.get.lastCall.args[0].path, "/RiseCache.zip");
       assert.equal(localPath, path.join("providedTestPath", "RiseCache.zip"));
     });
   });
