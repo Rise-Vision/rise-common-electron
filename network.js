@@ -81,7 +81,7 @@ module.exports = {
       reject = rej;
 
       setTimeout(()=>{
-        reject({ message: "Request timed out", error: originalUrl });
+        reject({ message: "Request timed out because global limit was reached", error: originalUrl });
       }, downloadTimeout);
 
       tryDownload(originalUrl);
@@ -146,7 +146,7 @@ module.exports = {
           if(!downloadStats[originalUrl].bytesReceived) {
             req.abort();
             if (downloadStats[originalUrl].tries === maxRetries) {
-              reject({ message: "Request timed out", error: originalUrl });
+              reject({ message: "Request timed out because of socket inactivity", error: originalUrl });
             } else {
               tryDownload(downloadUrl);
             }
