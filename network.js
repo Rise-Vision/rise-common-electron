@@ -15,7 +15,7 @@ proxyFields = null,
 proxyObservers = [],
 maxRetries = 10;
 
-const downloadTimeout = 1000 * 60 * 20;
+const downloadTimeout = 1000 * 60 * 60 * 12;
 
 proxy.observe((fields)=>{
   proxyFields = fields;
