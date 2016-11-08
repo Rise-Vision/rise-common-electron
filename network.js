@@ -15,7 +15,7 @@ proxyFields = null,
 proxyObservers = [],
 maxRetries = 10;
 
-const downloadTimeout = 1000 * 60 * 20;
+const downloadTimeout = 1000 * 60 * 60 * 12;
 
 proxy.observe((fields)=>{
   proxyFields = fields;
@@ -41,6 +41,12 @@ function setJavaProxyArgs(fields) {
   }
 }
 
+function setRequestAgent(dest, opts) {
+  let agent = dest.indexOf("https:") > -1 ? fetchAgents.httpsAgent : fetchAgents.httpAgent;
+
+  return Object.assign({}, {agent}, opts);
+}
+
 module.exports = {
   setJavaProxyArgs,
   setNodeAgents(httpAgent, httpsAgent) {
@@ -50,10 +56,7 @@ module.exports = {
     };
   },
   httpFetch(dest, opts) {
-    let agent = dest.indexOf("https:") > -1 ? fetchAgents.httpsAgent : fetchAgents.httpAgent;
-    opts = Object.assign({}, {agent}, opts);
-
-    return module.exports.callFetch(dest, opts);
+    return module.exports.callFetch(dest, setRequestAgent(dest, opts));
   },
   getProxyAgents() {
     return fetchAgents;
@@ -78,7 +81,7 @@ module.exports = {
       reject = rej;
 
       setTimeout(()=>{
-        reject({ message: "Request timed out", error: originalUrl });
+        reject({ message: "Request timed out because global limit was reached", error: originalUrl });
       }, downloadTimeout);
 
       tryDownload(originalUrl);
@@ -86,6 +89,7 @@ module.exports = {
 
     function tryDownload(downloadUrl) {
       var file = fs.createWriteStream(savePath);
+      var opts = url.parse(downloadUrl);
 
       downloadStats[originalUrl].tries += 1;
 
@@ -95,7 +99,7 @@ module.exports = {
 
       log.debug("Downloading " + originalUrl + " try " + downloadStats[originalUrl].tries);
 
-      var req = http.get(downloadUrl, (res)=>{
+      var req = http.get(setRequestAgent(downloadUrl, opts), (res)=>{
         if (isRedirect(res.statusCode)) {
           if (downloadStats[originalUrl].tries === maxRetries) {
             reject({message: "Too many download attempts"});
@@ -137,12 +141,12 @@ module.exports = {
       });
 
       req.on("socket", function (socket) {
-        socket.setTimeout(9000);
+        socket.setTimeout(30000);
         socket.on("timeout", function() {
           if(!downloadStats[originalUrl].bytesReceived) {
             req.abort();
             if (downloadStats[originalUrl].tries === maxRetries) {
-              reject({ message: "Request timed out", error: originalUrl });
+              reject({ message: "Request timed out because of socket inactivity", error: originalUrl });
             } else {
               tryDownload(downloadUrl);
             }
