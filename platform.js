@@ -29,6 +29,9 @@ module.exports = {
   getHomeDir() {
     return process.env[module.exports.isWindows() ? "LOCALAPPDATA" : "HOME"];
   },
+  getUserDir() {
+    return process.env[module.exports.isWindows() ? "HOMEPATH" : "HOME"];
+  },
   getUbuntuVer() {
     return childProcess.spawnSync("lsb_release", ["-sr"]).stdout;
   },
