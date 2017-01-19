@@ -101,10 +101,13 @@ module.exports = {
         detached: true
       }).unref();
     } catch(err) {
-      if (tries <= 0) {throw err;}
-      setTimeout(()=>{
-        module.exports.startProcess(command, args, tries);
-      }, 2000);
+      if (tries <= 0) {
+        log.external("error starting process", require("util").inspect(err));
+      } else {
+        setTimeout(()=>{
+          module.exports.startProcess(command, args, tries);
+        }, 2000);
+      }
     }
   },
   spawn(command, args, timeout, tries) {
