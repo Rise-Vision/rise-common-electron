@@ -1,5 +1,6 @@
 var assert = require("assert"),
 simple = require("simple-mock"),
+lolex = require("lolex"),
 bqClient,
 extlogger;
 
@@ -10,7 +11,7 @@ describe("external logger bigquery", function() {
     extlogger.setDisplaySettings("");
 
     bqClient = extlogger.getBQClient();
-    simple.mock(bqClient, "insert").resolveWith();
+
   });
 
   afterEach(()=>{
@@ -29,12 +30,14 @@ describe("external logger bigquery", function() {
 
   it("rejects the call if eventName is not provided", function() {
     return extlogger.log()
+    .then(()=>assert(false))
     .catch((err)=>{
       assert(err);
     });
   });
 
   it("logs using temp display id if no real display id set up", function() {
+    simple.mock(bqClient, "insert").resolveWith();
     extlogger.setDisplaySettings({tempdisplayid: "temp id"});
     return extlogger.log("testEvent")
     .then(()=>{
@@ -44,11 +47,73 @@ describe("external logger bigquery", function() {
   });
 
   it("logs using real display id if it exists", function() {
+    simple.mock(bqClient, "insert").resolveWith();
     extlogger.setDisplaySettings({displayid: "real id"});
     return extlogger.log("testEvent")
     .then(()=>{
       var calledWithId = bqClient.insert.lastCall.args[1].display_id;
       assert.equal(calledWithId, "real id");
+    });
+  });
+
+  it("adds failed log entries on insert failure", ()=>{
+    simple.mock(bqClient, "insert").rejectWith();
+    return extlogger.log("testEvent")
+    .then(()=>assert(false))
+    .catch(()=>{
+      assert.equal(Object.keys(extlogger.pendingEntries()).length, 1);
+      console.log(extlogger.pendingEntries());
+    });
+  });
+
+  it("failed log entries are logged after time passes", ()=>{
+    simple.mock(bqClient, "insert").rejectWith().resolveWith();
+    clock = lolex.install();
+
+    return extlogger.log("testEvent")
+    .then(()=>{assert(false);})
+    .catch(()=>{
+      assert.equal(Object.keys(extlogger.pendingEntries()).length, 1);
+      clock.runToLast();
+      clock.uninstall();
+      return new Promise((res, rej)=>{
+        setTimeout(()=>{
+          assert.equal(Object.keys(extlogger.pendingEntries()).length, 0);
+          assert.equal(bqClient.insert.callCount, 2);
+          res();
+        }, 100);
+      });
+    });
+  });
+
+  it("multiple attempts are made to log entries after time passes", ()=>{
+    simple.mock(bqClient, "insert").rejectWith().rejectWith().resolveWith();
+    nativeTimeout = setTimeout;
+    clock = lolex.install();
+
+    return extlogger.log("testEvent")
+    .then(()=>{assert(false);})
+    .catch(()=>{
+      assert.equal(Object.keys(extlogger.pendingEntries()).length, 1);
+      assert.equal(bqClient.insert.callCount, 1);
+      clock.runToLast();
+      return new Promise((res, rej)=>{
+        nativeTimeout(()=>{
+          assert.equal(bqClient.insert.callCount, 2);
+          clock.runToLast();
+          res();
+        }, 100);
+      })
+      .then(()=>{
+        clock.uninstall();
+        return new Promise((res, rej)=>{
+          setTimeout(()=>{
+            assert.equal(bqClient.insert.callCount, 3);
+            assert.equal(Object.keys(extlogger.pendingEntries()).length, 0);
+            res();
+          }, 100);
+        });
+      });
     });
   });
 });

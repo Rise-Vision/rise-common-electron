@@ -1,6 +1,11 @@
 module.exports = (systemOS, systemArch, installerVersion, osDesc)=>{
   var bqClient = require("./bq-client.js")("client-side-events", "Installer_Events"),
+  failedLogEntries = {},
+  MAX_FAILED_LOG_QUEUE = 50,
   displaySettings = {},
+  TEN_MINUTE_MS = 60 * 1000 * 10,
+  FIVE_HOURS_MS = TEN_MINUTE_MS * 6 * 5,
+  FAILED_ENTRY_RETRY_MS = TEN_MINUTE_MS,
   os = osDesc || (systemOS + " " + systemArch);
 
   function getDateForTableName(nowDate) {
@@ -13,6 +18,37 @@ module.exports = (systemOS, systemArch, installerVersion, osDesc)=>{
 
     return "" + year + month + day;
   }
+
+  function insert(date, data) {
+    return bqClient.insert("events" + mod.getDateForTableName(date), data, date)
+    .catch(e=>{
+      addFailedLogEntry(date, data);
+      setTimeout(insertFailedLogEntries, FAILED_ENTRY_RETRY_MS);
+      FAILED_ENTRY_RETRY_MS = Math.min(FAILED_ENTRY_RETRY_MS * 1.5, FIVE_HOURS_MS);
+      throw e;
+    });
+  }
+
+  function addFailedLogEntry(date, data) {
+    if (Object.keys(failedLogEntries).length >= MAX_FAILED_LOG_QUEUE) { return; }
+    failedLogEntries[Number(date)] = [date, data];
+  }
+
+  function insertFailedLogEntries() {
+    let entryKey = Object.keys(failedLogEntries)[0];
+    if (!entryKey) { return; }
+
+    insert(...failedLogEntries[entryKey])
+    .then(()=>{
+      delete failedLogEntries[entryKey];
+      insertFailedLogEntries();
+    })
+    .catch(()=>{
+      log.file("Could not log previously failed entry.");
+    });
+  }
+
+  function msToMins(ms) { return ms / 1000 / 60; }
 
   var mod = {
     getDateForTableName,
@@ -35,11 +71,12 @@ module.exports = (systemOS, systemArch, installerVersion, osDesc)=>{
         ts: nowDate.toISOString()
       };
 
-      return bqClient.insert("events" + mod.getDateForTableName(nowDate), data, nowDate)
-      .catch(e=>{
+      return insert(nowDate, data)
+      .catch((e)=>{
         log.file("Could not log to bq " + require("util").inspect(e, { depth: null }));
       });
-    }
+    },
+    pendingEntries() { return failedLogEntries; }
   };
 
   return mod;
