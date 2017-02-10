@@ -1,13 +1,16 @@
 var assert = require("assert"),
 simple = require("simple-mock"),
 lolex = require("lolex"),
+fs = require("fs"),
 bqClient,
 extlogger;
 
 describe("external logger bigquery", function() {
   beforeEach("setup", ()=> {
+    simple.mock(fs, "writeFile").returnWith();
+  
     extlogger = require("../../external-logger-bigquery.js")
-    ("", "", "version");
+    ("", "", "version", "", __dirname);
     extlogger.setDisplaySettings("");
 
     bqClient = extlogger.getBQClient();
@@ -30,9 +33,11 @@ describe("external logger bigquery", function() {
 
   it("rejects the call if eventName is not provided", function() {
     return extlogger.log()
-    .then(()=>assert(false))
+    .then(()=>{
+      throw Error("Should not be here");
+    })
     .catch((err)=>{
-      assert(err);
+      assert(err === "eventName is required");
     });
   });
 
@@ -59,8 +64,7 @@ describe("external logger bigquery", function() {
   it("adds failed log entries on insert failure", ()=>{
     simple.mock(bqClient, "insert").rejectWith();
     return extlogger.log("testEvent")
-    .then(()=>assert(false))
-    .catch(()=>{
+    .then(()=>{
       assert.equal(Object.keys(extlogger.pendingEntries()).length, 1);
       console.log(extlogger.pendingEntries());
     });
@@ -71,8 +75,7 @@ describe("external logger bigquery", function() {
     clock = lolex.install();
 
     return extlogger.log("testEvent")
-    .then(()=>{assert(false);})
-    .catch(()=>{
+    .then(()=>{
       assert.equal(Object.keys(extlogger.pendingEntries()).length, 1);
       clock.runToLast();
       clock.uninstall();
@@ -92,8 +95,7 @@ describe("external logger bigquery", function() {
     clock = lolex.install();
 
     return extlogger.log("testEvent")
-    .then(()=>{assert(false);})
-    .catch(()=>{
+    .then(()=>{
       assert.equal(Object.keys(extlogger.pendingEntries()).length, 1);
       assert.equal(bqClient.insert.callCount, 1);
       clock.runToLast();
@@ -109,10 +111,43 @@ describe("external logger bigquery", function() {
         return new Promise((res, rej)=>{
           setTimeout(()=>{
             assert.equal(bqClient.insert.callCount, 3);
+            assert(/events[\d]{8}/.test(bqClient.insert.lastCall.args[0]));
+            assert.equal(bqClient.insert.lastCall.args[1].event, "testEvent");
+            assert.equal(Object.keys(bqClient.insert.lastCall.args[1]).length, 6);
             assert.equal(Object.keys(extlogger.pendingEntries()).length, 0);
             res();
           }, 100);
         });
+      });
+    });
+  });
+
+  it("persists and retrieves failed entries", ()=>{
+    nativeTimeout = setTimeout;
+    clock = lolex.install();
+
+    extlogger = require("../../external-logger-bigquery.js")
+    ("", "", "version", "", __dirname);
+    extlogger.setDisplaySettings("");
+
+    bqClient = extlogger.getBQClient();
+    simple.mock(bqClient, "insert").rejectWith().rejectWith().resolveWith();
+
+    return extlogger.log("testEvent")
+    .then(()=>{
+      assert.equal(Object.keys(extlogger.pendingEntries()).length, 1);
+      assert.equal(bqClient.insert.callCount, 1);
+      clock.runToLast();
+      clock.uninstall();
+      return new Promise((res, rej)=>{
+        nativeTimeout(()=>{
+          assert.equal(bqClient.insert.callCount, 2);
+          assert.equal(fs.writeFile.callCount, 1);
+          assert(fs.writeFile.lastCall.args[0].includes(__dirname));
+          assert(fs.writeFile.lastCall.args[0].includes(".json"));
+          assert(JSON.parse(fs.writeFile.lastCall.args[1])[0][1].installer_version);
+          res();
+        }, 100);
       });
     });
   });

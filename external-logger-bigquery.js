@@ -1,12 +1,24 @@
-module.exports = (systemOS, systemArch, installerVersion, osDesc)=>{
+module.exports = (systemOS, systemArch, installerVersion, osDesc, installPath)=>{
   var bqClient = require("./bq-client.js")("client-side-events", "Installer_Events"),
-  failedLogEntries = {},
+  fs = require("fs"),
+  failedLogEntries,
+  FAILED_ENTRY_FILE = ".failed-log-entries.json",
+  FAILED_FILE_PATH = require("path").join(installPath, FAILED_ENTRY_FILE),
   MAX_FAILED_LOG_QUEUE = 50,
   displaySettings = {},
   TEN_MINUTE_MS = 60 * 1000 * 10,
   FIVE_HOURS_MS = TEN_MINUTE_MS * 6 * 5,
   FAILED_ENTRY_RETRY_MS = TEN_MINUTE_MS,
+  PERSIST_FAILURE_DEBOUNCE = 5000,
+  persistFailuresTimeout,
+  installPath = installPath || require("os").homedir(),
   os = osDesc || (systemOS + " " + systemArch);
+
+  try {
+    failedLogEntries = require(FAILED_FILE_PATH);
+  } catch(e) {
+    failedLogEntries = {};
+  }
 
   function getDateForTableName(nowDate) {
     var year = nowDate.getUTCFullYear(),
@@ -32,6 +44,8 @@ module.exports = (systemOS, systemArch, installerVersion, osDesc)=>{
   function addFailedLogEntry(date, data) {
     if (Object.keys(failedLogEntries).length >= MAX_FAILED_LOG_QUEUE) { return; }
     failedLogEntries[Number(date)] = [date, data];
+    if (persistFailuresTimeout) {cancelTimeout(persistFailuresTimeout);}
+    persistFailuresTimeout = setTimeout(persistFailures, PERSIST_FAILURE_DEBOUNCE);
   }
 
   function insertFailedLogEntries() {
@@ -49,6 +63,15 @@ module.exports = (systemOS, systemArch, installerVersion, osDesc)=>{
   }
 
   function msToMins(ms) { return ms / 1000 / 60; }
+
+  function persistFailures() {
+    persistFailuresTimeout = null;
+    fs.writeFile(FAILED_FILE_PATH, JSON.stringify(failedLogEntries, null, 2), {
+      encoding: "utf8"
+    }, (err)=>{
+      log.file("Could not save failed log entries");
+    });
+  }
 
   var mod = {
     getDateForTableName,
