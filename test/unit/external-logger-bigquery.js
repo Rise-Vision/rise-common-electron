@@ -81,8 +81,8 @@ describe("external logger bigquery", function() {
       clock.uninstall();
       return new Promise((res, rej)=>{
         setTimeout(()=>{
-          assert.equal(Object.keys(extlogger.pendingEntries()).length, 0);
           assert.equal(bqClient.insert.callCount, 2);
+          assert.equal(Object.keys(extlogger.pendingEntries()).length, 0);
           res();
         }, 100);
       });

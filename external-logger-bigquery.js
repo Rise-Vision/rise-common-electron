@@ -8,19 +8,25 @@ module.exports = (systemOS, systemArch, installerVersion, osDesc, installPath)=>
   displaySettings = {},
   TEN_MINUTE_MS = 60 * 1000 * 10,
   FIVE_HOURS_MS = TEN_MINUTE_MS * 6 * 5,
+  INITIAL_FAILED_LOG_RETRY_MS = 10000,
   FAILED_ENTRY_RETRY_MS = TEN_MINUTE_MS,
   PERSIST_FAILURE_DEBOUNCE = 5000,
   persistFailuresTimeout,
+  insertPending
   installPath = installPath || require("os").homedir(),
   os = osDesc || (systemOS + " " + systemArch);
 
   try {
     failedLogEntries = require(FAILED_FILE_PATH);
+    if (Object.keys(failedLogEntries).length) {
+      insertPending = setTimeout(insertFailedLogEntries, INITIAL_FAILED_LOG_RETRY_MS);
+    }
   } catch(e) {
     failedLogEntries = {};
   }
 
   function getDateForTableName(nowDate) {
+    nowDate = new Date(nowDate);
     var year = nowDate.getUTCFullYear(),
     month = nowDate.getUTCMonth() + 1,
     day = nowDate.getUTCDate();
@@ -35,31 +41,48 @@ module.exports = (systemOS, systemArch, installerVersion, osDesc, installPath)=>
     return bqClient.insert("events" + mod.getDateForTableName(date), data, date)
     .catch(e=>{
       addFailedLogEntry(date, data);
-      setTimeout(insertFailedLogEntries, FAILED_ENTRY_RETRY_MS);
-      FAILED_ENTRY_RETRY_MS = Math.min(FAILED_ENTRY_RETRY_MS * 1.5, FIVE_HOURS_MS);
-      throw e;
+      scheduleLogInsert();
+
+      return Promise.reject(e);
     });
   }
 
   function addFailedLogEntry(date, data) {
     if (Object.keys(failedLogEntries).length >= MAX_FAILED_LOG_QUEUE) { return; }
     failedLogEntries[Number(date)] = [date, data];
-    if (persistFailuresTimeout) {cancelTimeout(persistFailuresTimeout);}
-    persistFailuresTimeout = setTimeout(persistFailures, PERSIST_FAILURE_DEBOUNCE);
+    schedulePersist();
   }
 
   function insertFailedLogEntries() {
-    let entryKey = Object.keys(failedLogEntries)[0];
-    if (!entryKey) { return; }
+    insertPending = null;
+    log.file("Inserting failed bq log entries");
 
-    insert(...failedLogEntries[entryKey])
-    .then(()=>{
-      delete failedLogEntries[entryKey];
-      insertFailedLogEntries();
-    })
+    Object.keys(failedLogEntries).reduce((promiseChain, key)=>{
+      return promiseChain.then(()=>insert(...failedLogEntries[key]))
+      .then(()=>{
+        log.file("inserted " + key);
+        delete failedLogEntries[key];
+      });
+    }, Promise.resolve())
     .catch(()=>{
-      log.file("Could not log previously failed entry.");
+      log.file("Could not log all previously failed bq logs entries.");
+      scheduleLogInsert();
+    })
+    .then(()=>{
+      schedulePersist();
     });
+  }
+
+  function scheduleLogInsert() {
+    if (!insertPending) {
+      insertPending = setTimeout(insertFailedLogEntries, FAILED_ENTRY_RETRY_MS);
+      FAILED_ENTRY_RETRY_MS = Math.min(FAILED_ENTRY_RETRY_MS * 1.5, FIVE_HOURS_MS);
+    }
+  }
+
+  function schedulePersist() {
+    if (persistFailuresTimeout) {clearTimeout(persistFailuresTimeout);}
+    persistFailuresTimeout = setTimeout(persistFailures, PERSIST_FAILURE_DEBOUNCE);
   }
 
   function msToMins(ms) { return ms / 1000 / 60; }
@@ -69,7 +92,9 @@ module.exports = (systemOS, systemArch, installerVersion, osDesc, installPath)=>
     fs.writeFile(FAILED_FILE_PATH, JSON.stringify(failedLogEntries, null, 2), {
       encoding: "utf8"
     }, (err)=>{
-      log.file("Could not save failed log entries");
+      if (err) {
+        log.file("Could not save failed log entries. " + err.message);
+      }
     });
   }
 
@@ -84,6 +109,8 @@ module.exports = (systemOS, systemArch, installerVersion, osDesc, installPath)=>
       if (!nowDate || !Date.prototype.isPrototypeOf(nowDate)) {
         nowDate = new Date();
       }
+
+      if (typeof eventDetails === "object") eventDetails = JSON.stringify(eventDetails);
 
       var data = {
         event: eventName,
