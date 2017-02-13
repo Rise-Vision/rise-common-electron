@@ -1,10 +1,12 @@
 module.exports = (systemOS, systemArch, installerVersion, osDesc, installPath)=>{
   var bqClient = require("./bq-client.js")("client-side-events", "Installer_Events"),
   fs = require("fs"),
+  installPath = installPath || require("os").homedir(),
   failedLogEntries,
   FAILED_ENTRY_FILE = ".failed-log-entries.json",
   FAILED_FILE_PATH = require("path").join(installPath, FAILED_ENTRY_FILE),
   MAX_FAILED_LOG_QUEUE = 50,
+  FAILED_LOG_QUEUE_PURGE_COUNT = 10,
   displaySettings = {},
   TEN_MINUTE_MS = 60 * 1000 * 10,
   FIVE_HOURS_MS = TEN_MINUTE_MS * 6 * 5,
@@ -12,8 +14,7 @@ module.exports = (systemOS, systemArch, installerVersion, osDesc, installPath)=>
   FAILED_ENTRY_RETRY_MS = TEN_MINUTE_MS,
   PERSIST_FAILURE_DEBOUNCE = 5000,
   persistFailuresTimeout,
-  insertPending
-  installPath = installPath || require("os").homedir(),
+  insertPending,
   os = osDesc || (systemOS + " " + systemArch);
 
   try {
@@ -48,15 +49,23 @@ module.exports = (systemOS, systemArch, installerVersion, osDesc, installPath)=>
   }
 
   function addFailedLogEntry(date, data) {
-    if (Object.keys(failedLogEntries).length >= MAX_FAILED_LOG_QUEUE) { return; }
+    if (Object.keys(failedLogEntries).length >= MAX_FAILED_LOG_QUEUE) { purgeOldEntries(); }
     failedLogEntries[Number(date)] = [date, data];
     schedulePersist();
+  }
+
+  function purgeOldEntries() {
+    Object.keys(failedLogEntries)
+    .sort((a, b)=>a-b)
+    .slice(0, FAILED_LOG_QUEUE_PURGE_COUNT)
+    .forEach((key)=>{
+      delete failedLogEntries[key];
+    });
   }
 
   function insertFailedLogEntries() {
     insertPending = null;
     log.file("Inserting failed bq log entries");
-
     Object.keys(failedLogEntries).reduce((promiseChain, key)=>{
       return promiseChain.then(()=>insert(...failedLogEntries[key]))
       .then(()=>{
@@ -126,7 +135,8 @@ module.exports = (systemOS, systemArch, installerVersion, osDesc, installPath)=>
         log.file("Could not log to bq " + require("util").inspect(e, { depth: null }));
       });
     },
-    pendingEntries() { return failedLogEntries; }
+    pendingEntries() { return failedLogEntries; },
+    maxQueue() { return MAX_FAILED_LOG_QUEUE; }
   };
 
   return mod;

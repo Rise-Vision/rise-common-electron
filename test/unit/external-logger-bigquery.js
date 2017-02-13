@@ -151,4 +151,44 @@ describe("external logger bigquery", function() {
       });
     });
   });
+
+  it("trims old entries to maintain max queue size", ()=>{
+    nativeTimeout = setTimeout;
+    clock = lolex.install();
+
+    extlogger = require("../../external-logger-bigquery.js")
+    ("", "", "version", "", __dirname);
+    extlogger.setDisplaySettings("");
+
+    bqClient = extlogger.getBQClient();
+    simple.mock(bqClient, "insert").rejectWith();
+
+    let insertCount = extlogger.maxQueue() * 2;
+
+    while (insertCount--) {
+      extlogger.log("testEvent")
+      clock.tick("01");
+      clock.runToLast();
+    }
+
+    clock.uninstall();
+
+    return new Promise((res, rej)=>{
+      setTimeout(()=>{
+        let pendingEntryKeys = Object.keys(extlogger.pendingEntries());
+
+        assert.equal(bqClient.insert.callCount, extlogger.maxQueue() * 2);
+        assert.equal(pendingEntryKeys.length, extlogger.maxQueue());
+
+        assert(["1000", "2000", "3000"].every((earlierTime)=>{
+          return !pendingEntryKeys.includes(earlierTime);
+        }));
+        assert(["96000", "97000", "98000"].every((laterTime)=>{
+          return pendingEntryKeys.includes(laterTime);
+        }));
+
+        res();
+      }, 100);
+    });
+  });
 });
