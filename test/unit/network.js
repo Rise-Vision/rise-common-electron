@@ -1,4 +1,5 @@
 var platform = require("../../platform.js"),
+os = require("os"),
 network = require("../../network.js"),
 dns = require("dns"),
 http = require("http"),
@@ -139,5 +140,103 @@ describe("network", ()=>{
       assert.equal(dns.lookup.callCount, 3);
       assert.equal(result, false);
     });
+  });
+
+  it("gets first IPv4 external MAC address", ()=>{
+    mock(os, "networkInterfaces").returnWith({
+      lo: [
+        {
+          address: '127.0.0.1',
+          netmask: '255.0.0.0',
+          family: 'IPv4',
+          mac: '00:00:00:00:00:00',
+          internal: true
+        },
+        {
+          address: '::1',
+          netmask: 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff',
+          family: 'IPv6',
+          mac: '00:00:00:00:00:00',
+          internal: true
+        }
+      ],
+      eth0: [
+        {
+          address: '192.168.1.108',
+          netmask: '255.255.255.0',
+          family: 'IPv4',
+          mac: '01:02:03:0a:0b:0c',
+          internal: false
+        },
+        {
+          address: 'fe80::a00:27ff:fe4e:66a1',
+          netmask: 'ffff:ffff:ffff:ffff::',
+          family: 'IPv6',
+          mac: '01:02:03:0a:0b:0c',
+          internal: false
+        },
+        {
+          address: '192.168.1.108',
+          netmask: '255.255.255.0',
+          family: 'IPv4',
+          mac: '99:02:03:0a:0b:0c',
+          internal: false
+        }
+      ]
+    });
+
+    assert.equal(network.getMAC(), '01:02:03:0a:0b:0c');
+  });
+
+  it("returns null if no external address found", ()=>{
+    mock(os, "networkInterfaces").returnWith({
+      lo: [
+        {
+          address: '127.0.0.1',
+          netmask: '255.0.0.0',
+          family: 'IPv4',
+          mac: '00:00:00:00:00:00',
+          internal: true
+        },
+      ]
+    });
+
+    assert.equal(network.getMAC(), null);
+  });
+
+  it("returns null if no IPv4 address found", ()=>{
+    mock(os, "networkInterfaces").returnWith({
+      lo: [
+        {
+          address: '127.0.0.1',
+          netmask: '255.0.0.0',
+          family: 'IPv6',
+          mac: '00:00:00:00:00:00',
+          internal: false
+        },
+      ]
+    });
+
+    assert.equal(network.getMAC(), null);
+  });
+
+  it("returns null if no MAC property", ()=>{
+    mock(os, "networkInterfaces").returnWith({
+      lo: [
+        {
+          address: '127.0.0.1',
+          netmask: '255.0.0.0',
+          family: 'IPv6',
+          internal: false
+        },
+      ]
+    });
+
+    assert.equal(network.getMAC(), null);
+  });
+
+  it("returns null if dependency throws", ()=>{
+    mock(os, "networkInterfaces").throwWith(Error("test error"));
+    assert.equal(network.getMAC(), null);
   });
 });
