@@ -190,6 +190,18 @@ module.exports = {
       }
     });
   },
+  getMAC() {
+    try {
+      let interfaces = os.networkInterfaces();
+
+      return Object.keys(interfaces)
+      .reduce((addresses, key)=>addresses.concat(interfaces[key]), [])
+      .filter(address=>!address.internal && address.family === "IPv4")[0].mac
+    } catch(e) {
+      log.all(e);
+      return null;
+    }
+  },
   registerObserver(fn) {
     observers.push(fn);
   },
