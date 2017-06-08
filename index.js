@@ -1,15 +1,17 @@
 var logger = require("./logger.js"),
-externalLogger = require("./external-logger-bigquery.js"),
+externalInstallerLogger = require("./installer-logger-bq.js"),
 network = require("./network.js"),
 platform = require("./platform.js"),
 proxy = require("./proxy.js"),
-bqClient = require("./bq-client.js");
+bqClient = require("./bq-client.js"),
+bqController = require("./bq-controller.js");
 
 module.exports = {
   logger,
-  externalLogger,
+  externalInstallerLogger,
   network,
   platform,
   proxy,
-  bqClient
+  bqClient,
+  bqController
 };
