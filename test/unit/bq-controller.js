@@ -25,6 +25,12 @@ describe("big query insert", function() {
     assert.ok(bqController);
   });
 
+  it("returns a date formatted correctly for appending to a table name", function() {
+    assert.equal(bqController.getDateForTableName(new Date(2015, 5, 3)), "20150603");
+    assert.equal(bqController.getDateForTableName(new Date(2015, 11, 3)), "20151203");
+    assert.equal(bqController.getDateForTableName(new Date(2015, 11, 30)), "20151230");
+  });
+
   it("adds failed log entries on insert failure", ()=>{
     simple.mock(bqClient, "insert").rejectWith();
     return bqController.log("testTable", {test:"test"}, new Date())

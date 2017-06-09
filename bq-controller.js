@@ -83,6 +83,17 @@ module.exports = (projectName, dataSetName, filename, installPath)=>{
 
   var mod = {
     getBQClient() { return bqClient; },
+    getDateForTableName(date) {
+      date = new Date(date);
+      var year = date.getUTCFullYear(),
+        month = date.getUTCMonth() + 1,
+        day = date.getUTCDate();
+
+      if (month < 10) {month = "0" + month;}
+      if (day < 10) {day = "0" + day;}
+
+      return "" + year + month + day;
+    },
     init() {
       try {
         failedLogEntries = require(FAILED_FILE_PATH);
