@@ -98,7 +98,7 @@ module.exports = (projectName, dataSetName, filename, installPath)=>{
       try {
         failedLogEntries = require(FAILED_FILE_PATH);
         if (Object.keys(failedLogEntries).length) {
-          insertPending = setTimeout(insertFailedLogEntries, INITIAL_FAILED_LOG_RETRY_MS);
+          insertPending = insertPending || setTimeout(insertFailedLogEntries, INITIAL_FAILED_LOG_RETRY_MS);
         }
       } catch(e) {
         failedLogEntries = {};
