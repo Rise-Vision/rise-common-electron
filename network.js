@@ -1,7 +1,5 @@
 var platform = require("./platform.js"),
 dns = require("dns"),
-fetch = require("node-fetch"),
-http = require("http"),
 proxy = require("./proxy.js"),
 fetchAgents = {},
 javaProxyArgs = [],
@@ -9,11 +7,13 @@ url = require("url"),
 path = require("path"),
 fs = require("fs"),
 os = require("os"),
+got = require("got"),
 downloadStats = {},
 observers = [],
 proxyFields = null,
 proxyObservers = [],
 maxRetries = 10;
+
 
 const downloadTimeout = 1000 * 60 * 60 * 12;
 
@@ -65,7 +65,26 @@ module.exports = {
     return javaProxyArgs;
   },
   callFetch(dest, opts) {
-    return fetch(dest, opts);
+    return new Promise((resolve, reject)=>{
+      let proxyConfig = proxy.configuration();
+
+      if(Object.keys(proxyConfig).length !== 0) {
+        opts = Object.assign(opts, {useElectronNet: false});
+      }
+
+      got(dest, opts).then(response => {
+        let text = () => {return Promise.resolve(response.body.toString())};
+        let json = () => { try {
+                            return Promise.resolve(JSON.parse(response.body.toString()));
+                          } catch (err) {
+                            return Promise.reject({message: `invalid json response body at ${this.url} reason: ${err.message}`});
+                          }
+                        }
+        resolve(Object.assign(response, {json: json, text: text}));
+      }).catch(error => {
+        reject(error);
+      })
+    });
   },
   downloadFile(originalUrl, savePath) {
     var resolve, reject;
@@ -90,83 +109,33 @@ module.exports = {
     function tryDownload(downloadUrl) {
       var file = fs.createWriteStream(savePath);
       var opts = url.parse(downloadUrl);
-
-      downloadStats[originalUrl].tries += 1;
+      var withError = false;
 
       file.on("error", (err)=>{
         reject({ message: "Error creating temporary download file", error: err });
       });
 
-      log.debug("Downloading " + originalUrl + " try " + downloadStats[originalUrl].tries);
-
-      var req = http.get(setRequestAgent(downloadUrl, opts), (res)=>{
-        if (isRedirect(res.statusCode)) {
-          if (downloadStats[originalUrl].tries === maxRetries) {
-            reject({message: "Too many download attempts"});
-            return;
-          }
-
-          if (!res.headers.location) {
-            reject({message: "Missing location header at " + originalUrl});
-            return;
-          }
-
-          tryDownload(url.resolve(downloadUrl, res.headers.location));
-          return;
-        } else if(res.statusCode < 200 || res.statusCode >= 300) {
-          reject({ message: "Error downloading file", error: res.statusCode });
-          return;
-        }
-
-        downloadStats[originalUrl].bytesExpected = Number(res.headers["content-length"]);
-        downloadStats[originalUrl].bytesReceived = 0;
-
-        res.on("data", (data)=>{
-          downloadStats[originalUrl].bytesReceived += data.length;
-          file.write(data);
-          observers.forEach((observer)=>{observer(downloadStats);});
-        });
-        res.on("end", ()=>{
-          file.end();
+      file.on("finish", ()=> {
+        if (!withError) {
           resolve(savePath);
-        });
-        res.on("error", function(e) {
-          file.end();
-          if (downloadStats[originalUrl].tries === maxRetries) {
-            reject({ message: "Response error downloading file" + e.message, error: e });
-          } else {
-            tryDownload(downloadUrl);
-          }
-        });
-      });
-
-      req.on("socket", function (socket) {
-        socket.setTimeout(30000);
-        socket.on("timeout", function() {
-          if(!downloadStats[originalUrl].bytesReceived) {
-            req.abort();
-            if (downloadStats[originalUrl].tries === maxRetries) {
-              reject({ message: "Request timed out because of socket inactivity", error: originalUrl });
-            } else {
-              tryDownload(downloadUrl);
-            }
-          }
-        });
-      });
-
-      req.on("error", function(e) {
-        file.end();
-        if (downloadStats[originalUrl].tries === maxRetries) {
-          reject({ message: "Request error downloading file" + e.message, error: e });
-        } else {
-          tryDownload(downloadUrl);
         }
       });
 
-      function isRedirect(code) {
-        return code === 301 || code === 302 || code === 303 || code === 307 || code === 308;
+      log.debug(`Downloading${originalUrl}`);
+
+      let moreOpts = {retries: 4};
+      let proxyConfig = proxy.configuration();
+
+      if(Object.keys(proxyConfig).length !== 0) {
+        moreOpts = Object.assign(moreOpts, {useElectronNet: false});
       }
-    }
+
+      got.stream(setRequestAgent(downloadUrl, opts),moreOpts).on("error", (e, body, resp) => {
+        withError = true;
+        file.end();
+        reject({ message: "Response error downloading file " + e.message, error: e });
+      }).pipe(file);
+     }
   },
   getLocalIP() {
     return new Promise((res)=> {
