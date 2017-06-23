@@ -6,6 +6,9 @@ dependencies:
     - npm install -g istanbul
 
 test:
+  override:
+    - npm test
+    - npm run integration
   post:
     - mkdir -p $CIRCLE_TEST_REPORTS/mocha/
     - cp test/test-results.xml $CIRCLE_TEST_REPORTS/mocha

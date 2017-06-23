@@ -8,6 +8,7 @@ path = require("path"),
 url = require("url"),
 express = require("express"),
 fs = require("fs");
+var testServer, testRedirectServer;
 
 global.log = logger();
 
@@ -15,10 +16,15 @@ describe("Network", function() {
   var fileName = "test-file.txt",
   filePath = path.resolve(__dirname, fileName);
 
-  this.timeout(9000);
+  this.timeout(60000);
 
   before("setup servers", ()=>{
     return startServer().then(startRedirector);
+  });
+
+  after("close server", ()=>{
+    testServer.close();
+    testRedirectServer.close();
   });
 
   beforeEach("restore mocks", ()=>{
@@ -36,9 +42,9 @@ describe("Network", function() {
     simple.mock(global.log, "debug");
 
     return network.downloadFile(`http://localhost:${badPort}/${fileName}`)
-    .then(()=>{return Promise.reject();})
-    .catch(()=>{
-      assert.ok(log.debug.callCount > 4);
+    .then((error)=>{console.log(error)})
+    .catch((error)=>{
+      assert.equal(error.message, "Response error downloading file connect ECONNREFUSED 127.0.0.1:9875");
     });
   });
 
@@ -76,12 +82,35 @@ describe("Network", function() {
     });
   });
 
+  it("gets json from httpFecth", ()=>{
+    return network.httpFetch("https://rvaserver2.appspot.com/_ah/api/content/v0/display?id=AKQ2K8D9D9VE")
+      .then((resp)=>{
+        resp.json().then(content => assert.ok(content.item.companyId));
+      });
+  });
+
+  it("gets json from httpFecth", ()=>{
+    return network.httpFetch("https://rvaserver2.appspot.com/_ah/api/content/v0/display?id=AKQ2K8D9D9VE")
+      .then((resp)=>{
+        resp.text().then(content => assert.ok(content));
+      });
+  });
+
+  it("gets invalid json message", ()=>{
+    return network.httpFetch("www.google.com.br")
+      .then((resp)=>{
+        return resp.json();
+      }).catch((error)=>{
+         assert.equal(error.message, "invalid json response body at www.google.com.br reason: Unexpected token < in JSON at position 0");
+      });
+  });
+
   function startServer() {
     var server = express();
     server.use(express.static(path.resolve(__dirname, "test-files")));
 
     return new Promise((res)=>{
-      server.listen(9876, ()=>{res();});
+      testServer = server.listen(9876, ()=>{res();});
     });
   }
 
@@ -89,7 +118,7 @@ describe("Network", function() {
     var mainPort = "9876";
 
     return new Promise((res)=>{
-      http.createServer((req, resp)=>{
+      testRedirectServer = http.createServer((req, resp)=>{
         var redirectTo = `http://localhost:${mainPort}${url.parse(req.url).pathname}`;
         resp.writeHead(302, {"Location": redirectTo});
         resp.end("");

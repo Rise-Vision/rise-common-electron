@@ -1,6 +1,6 @@
 {
   "name": "rise-common-electron",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "",
   "main": "index.js",
   "author": "",
@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "fs-extra": "git+https://github.com/Rise-Vision/node-fs-extra",
+    "got": "^7.0.0",
     "gunzip-maybe": "^1.2.1",
     "http-proxy-agent": "^1.0.0",
     "https-proxy-agent": "^1.0.0",
@@ -32,6 +33,7 @@
     "windows-shortcuts": "git://github.com/Rise-Vision/windows-shortcuts.git"
   },
   "scripts": {
-    "test": "istanbul cover node_modules/mocha/bin/_mocha -r ./test/init.js -- --reporter mocha-junit-reporter --reporter-options mochaFile=test/test-results.xml --recursive test/unit"
+    "test": "istanbul cover node_modules/mocha/bin/_mocha -r ./test/init.js -- --reporter mocha-junit-reporter --reporter-options mochaFile=test/test-results.xml --recursive test/unit",
+    "integration": "node_modules/mocha/bin/_mocha -r ./test/init.js --recursive test/integration"
   }
 }
