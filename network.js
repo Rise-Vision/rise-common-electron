@@ -68,7 +68,7 @@ module.exports = {
     return new Promise((resolve, reject)=>{
       let proxyConfig = proxy.configuration();
 
-      if(Object.keys(proxyConfig).length !== 0 ) {
+      if(proxyConfig && proxyConfig.host) {
         opts = Object.assign(opts, {useElectronNet: false});
       }
 
@@ -126,7 +126,7 @@ module.exports = {
       let moreOpts = {retries: 4};
       let proxyConfig = proxy.configuration();
 
-      if(Object.keys(proxyConfig).length !== 0) {
+      if(proxyConfig && proxyConfig.host) {
         moreOpts = Object.assign(moreOpts, {useElectronNet: false});
       }
 
