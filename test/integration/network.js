@@ -101,7 +101,7 @@ describe("Network", function() {
       .then((resp)=>{
         return resp.json();
       }).catch((error)=>{
-         assert.equal(error.message, "invalid json response body at undefined reason: Unexpected token < in JSON at position 0");
+         assert.equal(error.message, "invalid json response body at www.google.com.br reason: Unexpected token < in JSON at position 0");
       });
   });
 

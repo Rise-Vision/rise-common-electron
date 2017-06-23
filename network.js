@@ -68,7 +68,7 @@ module.exports = {
     return new Promise((resolve, reject)=>{
       let proxyConfig = proxy.configuration();
 
-      if(Object.keys(proxyConfig).length !== 0) {
+      if(Object.keys(proxyConfig).length !== 0 ) {
         opts = Object.assign(opts, {useElectronNet: false});
       }
 
@@ -77,7 +77,7 @@ module.exports = {
         let json = () => { try {
                             return Promise.resolve(JSON.parse(response.body.toString()));
                           } catch (err) {
-                            return Promise.reject({message: `invalid json response body at ${this.url} reason: ${err.message}`});
+                            return Promise.reject({message: `invalid json response body at ${dest} reason: ${err.message}`});
                           }
                         }
         resolve(Object.assign(response, {json: json, text: text}));
