@@ -40,6 +40,27 @@ describe("platform", ()=>{
     assert.equal(childProcess.spawnSync.lastCall.args[1][0], "-sr");
   });
 
+  it("opens the operating system's proxy config window", ()=>{
+    let windowsArgs, linuxArgs;
+    mock(platform, "isWindows").returnWith(true);
+    mock(platform, "startProcess").returnWith(true);
+
+    platform.openOSProxySettingsWindow();
+
+    windowsArgs = platform.startProcess.lastCall.args;
+    assert(windowsArgs.length);
+
+    simpleMock.restore();
+    mock(platform, "isWindows").returnWith(false);
+    mock(platform, "startProcess").returnWith(true);
+
+    platform.openOSProxySettingsWindow();
+    linuxArgs = platform.startProcess.lastCall.args;
+    assert(linuxArgs.length);
+
+    assert(linuxArgs[0] !== windowsArgs[0]);
+  });
+
   it("waits for 100ms to resolve the promise", ()=>{
     var time0 = new Date().getTime();
 
