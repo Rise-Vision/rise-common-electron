@@ -74,6 +74,11 @@ module.exports = {
       return path.join(module.exports.getHomeDir(), ".local", "share", "applications");
     }
   },
+  openOSProxySettingsWindow() {
+    let windowsCmd = ["rundll32.exe", ["inetcpl.cpl,LaunchConnectionDialog"]];
+    let linuxCmd = ["unity-control-center", ["network"]];
+    module.exports.startProcess(...(module.exports.isWindows() ? windowsCmd : linuxCmd));
+  },
   getAutoStartupPath() {
     if(module.exports.isWindows()) {
       return path.join(module.exports.getProgramsMenuPath(), "Startup");
