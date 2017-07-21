@@ -100,13 +100,19 @@ module.exports = {
     tries -= 1;
 
     try {
-      childProcess.spawn(command, args, {
+      let child = childProcess.spawn(command, args, {
         cwd: path.dirname(command),
         stdio: "ignore",
         detached: true
-      }).unref();
+      });
+      child.on("error", handleError);
+      child.unref();
     } catch(err) {
-      if (tries <= 0) {
+      handleError(err);
+    }
+
+    function handleError(err) {
+      if (tries <= 0 || err.code === "ENOENT") {
         log.external("error starting process", require("util").inspect(err));
       } else {
         setTimeout(()=>{
