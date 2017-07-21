@@ -85,14 +85,14 @@ describe("Network", function() {
   it("gets json from httpFecth", ()=>{
     return network.httpFetch("https://rvaserver2.appspot.com/_ah/api/content/v0/display?id=AKQ2K8D9D9VE")
       .then((resp)=>{
-        resp.json().then(content => assert.ok(content.item.companyId));
+        return resp.json().then(content => assert.ok(content.item.companyId));
       });
   });
 
-  it("gets json from httpFecth", ()=>{
-    return network.httpFetch("https://rvaserver2.appspot.com/_ah/api/content/v0/display?id=AKQ2K8D9D9VE")
+  it("gets text from httpFecth", ()=>{
+    return network.httpFetch("https://rvaserver2.appspot.com/_ah/api/content/v0/display?id=UNB8FAXR598G")
       .then((resp)=>{
-        resp.text().then(content => assert.ok(content));
+        return resp.text().then(content => assert.ok(content));
       });
   });
 
