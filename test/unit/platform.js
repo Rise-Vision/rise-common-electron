@@ -83,7 +83,6 @@ describe("platform", ()=>{
     var intervalHandler,
     expectedCallCount = 3;
 
-    this.timeout(8000);
     mock(childProcess, "spawn")
     .throwWith(new Error("1"))
     .throwWith(new Error("2"))

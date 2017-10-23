@@ -10,7 +10,7 @@ describe("big query insert", function() {
     simple.mock(fs, "writeFile").returnWith();
 
     bqController = require("../../bq-controller.js")
-    ("test-side-events", "Test_Events", ".failed-log-entries.json", __dirname);
+    ("test-side-events", "Test_Events", ".test-failed-log-entries.json", __dirname);
     bqClient = bqController.getBQClient();
 
     bqController.init();
@@ -96,7 +96,7 @@ describe("big query insert", function() {
     clock = lolex.install();
 
     bqController = require("../../bq-controller.js")
-    ("test-side-events", "Test_Events", ".failed-log-entries.json", __dirname);
+    ("test-side-events", "Test_Events", ".test-failed-log-entries.json", __dirname);
     bqClient = bqController.getBQClient();
     bqController.init();
 
@@ -126,7 +126,7 @@ describe("big query insert", function() {
     clock = lolex.install();
 
     bqController = require("../../bq-controller.js")
-    ("test-side-events", "Test_Events", ".failed-log-entries.json", __dirname);
+    ("test-side-events", "Test_Events", ".test-failed-log-entries.json", __dirname);
     bqClient = bqController.getBQClient();
     bqController.init();
 
