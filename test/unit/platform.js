@@ -1,3 +1,4 @@
+const originalEnv = Object.assign({}, process.env);
 var platform = require("../../platform.js"),
 path = require("path"),
 childProcess = require("child_process"),
@@ -604,5 +605,15 @@ describe("platform", ()=>{
         assert.equal(err.toString(), [ "err1", "err2", "err3", "err4" ].toString());
         assert(Date.now() - start >= 150);
       });
+  });
+
+  it("launches explorer with initial env vars", ()=>{
+    mock(platform, "isWindows").returnWith(true);
+    mock(platform, "getWindowsVersion").returnWith("10");
+    mock(platform, "startProcess").resolveWith();
+
+    process.env.SET_SOME_NEW_ENV_VAR = "should not be included in the explorer environment";
+    platform.launchExplorer();
+    assert.deepEqual(platform.startProcess.lastCall.args[3].env, originalEnv);
   });
 });
