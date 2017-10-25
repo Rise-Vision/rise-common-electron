@@ -10,6 +10,11 @@ gunzip = require("gunzip-maybe"),
 tar = require("tar-fs"),
 ws = require("windows-shortcuts");
 
+let initialEnvVars = Object.assign({}, process.env);
+Object.keys(initialEnvVars).forEach(key=>{
+  if (key.includes("ELECTRON")) delete initialEnvVars[key];
+});
+
 module.exports = {
   getCoreUrl() {
     return "https://rvaserver2.appspot.com";
@@ -94,17 +99,17 @@ module.exports = {
       }, milliseconds);
     });
   },
-  startProcess(command, args, tries) {
+  startProcess(command, args, tries, opts = {}) {
     if (tries === undefined || tries === null) {tries = 3;}
     if (tries <= 0) {return;}
     tries -= 1;
 
     try {
-      let child = childProcess.spawn(command, args, {
+      let child = childProcess.spawn(command, args, Object.assign({}, opts, {
         cwd: path.dirname(command),
         stdio: "ignore",
         detached: true
-      });
+      }));
       child.on("error", handleError);
       child.unref();
     } catch(err) {
@@ -172,7 +177,7 @@ module.exports = {
   launchExplorer() {
     if (module.exports.isWindows() && module.exports.getWindowsVersion() !== "7") {
       try {
-        module.exports.startProcess("cmd", ["/c", "explorer"], 1);
+        module.exports.startProcess("cmd", ["/c", "explorer"], 1, {env: initialEnvVars});
       } catch (err) {
         log.debug("explorer launch error: " + err);
       }
