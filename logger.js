@@ -104,10 +104,10 @@ module.exports = (externalLogger, logFolder, logFilePrefix = "installer")=> {
     setDisplaySettings(settings) {
       if (externalLogger) {externalLogger.setDisplaySettings(settings);}
     },
-    external(evt, detail) {
-      appendToLog(evt, detail);
+    external(evt, detail, table) {
+      appendToLog(table || evt, detail);
 
-      if (externalLogger) {externalLogger.log(evt, detail);}
+      if (externalLogger) {externalLogger.log(table || evt, detail);}
     },
     file(detail, userFriendlyMessage) {
       appendToLog(detail, userFriendlyMessage);
