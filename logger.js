@@ -3,7 +3,7 @@ path = require("path"),
 debugging = process.argv.slice(1).join(" ").indexOf("debug") > -1,
 debug = (debugging ? (msg)=>{console.log(msg);} : ()=>{});
 
-module.exports = (externalLogger, logFolder, logFilePrefix = "installer")=> {
+module.exports = (externalLogger, logFolder, from, logFilePrefix = "installer")=> {
   var uiWindow;
 
   function validUiWindow() {
@@ -105,9 +105,9 @@ module.exports = (externalLogger, logFolder, logFilePrefix = "installer")=> {
       if (externalLogger) {externalLogger.setDisplaySettings(settings);}
     },
     external(evt, detail, table) {
-      appendToLog(table || evt, detail);
+      appendToLog(evt, detail);
 
-      if (externalLogger) {externalLogger.log(table || evt, detail);}
+      if (externalLogger) {externalLogger.log(evt, detail, table, from);}
     },
     file(detail, userFriendlyMessage) {
       appendToLog(detail, userFriendlyMessage);
