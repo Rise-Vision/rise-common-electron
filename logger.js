@@ -3,7 +3,7 @@ path = require("path"),
 debugging = process.argv.slice(1).join(" ").indexOf("debug") > -1,
 debug = (debugging ? (msg)=>{console.log(msg);} : ()=>{});
 
-module.exports = (externalLogger, logFolder, from, logFilePrefix = "installer")=> {
+module.exports = (externalLogger, logFolder, moduleName = "installer")=> {
   var uiWindow;
 
   function validUiWindow() {
@@ -37,7 +37,7 @@ module.exports = (externalLogger, logFolder, from, logFilePrefix = "installer")=
 
   function resetLogFiles(maxSize=0) {
     try {
-      [`${logFilePrefix}-events.log`,`${logFilePrefix}-detail.log`]
+      [`${moduleName}-events.log`,`${moduleName}-detail.log`]
       .forEach((str)=>{
         let filePath = path.join(logFolder, str);
         if (fs.statSync(filePath).size < maxSize) {return;}
@@ -54,8 +54,8 @@ module.exports = (externalLogger, logFolder, from, logFilePrefix = "installer")=
     if(!logFolder) return;
 
     try {
-      var eventsLog = path.join(logFolder, `${logFilePrefix}-events.log`);
-      var detailsLog = path.join(logFolder, `${logFilePrefix}-detail.log`);
+      var eventsLog = path.join(logFolder, `${moduleName}-events.log`);
+      var detailsLog = path.join(logFolder, `${moduleName}-detail.log`);
 
       if(!fileExists(logFolder)) {
         fs.mkdirSync(logFolder);
@@ -107,7 +107,7 @@ module.exports = (externalLogger, logFolder, from, logFilePrefix = "installer")=
     external(evt, detail, table) {
       appendToLog(evt, detail);
 
-      if (externalLogger) {externalLogger.log(evt, detail, table, from);}
+      if (externalLogger) {externalLogger.log(evt, detail, table, moduleName);}
     },
     file(detail, userFriendlyMessage) {
       appendToLog(detail, userFriendlyMessage);
