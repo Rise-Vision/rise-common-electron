@@ -83,20 +83,20 @@ module.exports = (externalLogger, logFolder, moduleName = "installer")=> {
 
   return {
     debug,
-    error(detail, userFriendlyMessage) {
+    error(detail, userFriendlyMessage, table) {
       debug("ERROR: " + detail);
       appendToLog(detail, userFriendlyMessage);
 
-      if (externalLogger) {externalLogger.log("error", detail);}
+      if (externalLogger) {externalLogger.log("error", detail, table, moduleName);}
       if (validUiWindow()) {uiWindow.send("errorMessage", userFriendlyMessage || detail);}
     },
-    all(evt, detail, pct) {
+    all(evt, detail, pct, table) {
       debug(evt, detail ? detail : "");
       appendToLog(detail, evt);
 
       if (validUiWindow() && !pct) {uiWindow.send("message", detail ? evt + ": " + detail : evt);}
       if (validUiWindow() && pct) {uiWindow.send("set-progress", {msg: evt, pct});}
-      if (externalLogger) {externalLogger.log(evt, detail);}
+      if (externalLogger) {externalLogger.log(evt, detail, table, moduleName);}
     },
     setUIWindow(win) {
       uiWindow = win;
