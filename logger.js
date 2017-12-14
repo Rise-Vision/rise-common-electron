@@ -47,15 +47,14 @@ module.exports = (externalLogger, logFolder, moduleName = "installer")=> {
   }
 
   function appendToLog(detail, userFriendlyMessage) {
-    // Do not attempt to write logs on test cases
-    if(!process.versions.electron) return;
-
     // Do not log to files if logFolder is not defined
     if(!logFolder) return;
 
     try {
       var eventsLog = path.join(logFolder, `${moduleName}-events.log`);
       var detailsLog = path.join(logFolder, `${moduleName}-detail.log`);
+      // backwards compatible for installer and player modules
+      var detailsVal = (typeof detail === "string") ? detail : detail.event_details || "";
 
       if(!fileExists(logFolder)) {
         fs.mkdirSync(logFolder);
@@ -65,7 +64,7 @@ module.exports = (externalLogger, logFolder, moduleName = "installer")=> {
         fs.appendFileSync(eventsLog, getLogDatetime() + " - " + userFriendlyMessage + "\n");
       }
 
-      if(detail) {
+      if(detailsVal) {
         if(userFriendlyMessage) {
           fs.appendFileSync(detailsLog, getLogDatetime() + " - " + userFriendlyMessage + "\n");
         }
@@ -73,7 +72,8 @@ module.exports = (externalLogger, logFolder, moduleName = "installer")=> {
           fs.appendFileSync(detailsLog, getLogDatetime() + "\n");
         }
 
-        fs.appendFileSync(detailsLog, detail + "\n");
+        if (typeof detailsVal === "object") { detailsVal = JSON.stringify(detailsVal); }
+        fs.appendFileSync(detailsLog, detailsVal + "\n");
       }
     }
     catch (err) {
