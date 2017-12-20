@@ -73,12 +73,12 @@ module.exports = (projectName, dataSetName, filename, installPath)=>{
 
   function insert(tableName, data, date, templateSuffix) {
     return bqClient.insert(tableName, data, date, templateSuffix)
-      .catch(e=>{
-        addFailedLogEntry(tableName, data, date, templateSuffix);
-        scheduleLogInsert();
+    .catch(e=>{
+      addFailedLogEntry(tableName, data, date, templateSuffix);
+      scheduleLogInsert();
 
-        return Promise.reject(e);
-      });
+      return Promise.reject(e);
+    });
   }
 
   var mod = {
