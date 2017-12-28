@@ -56,10 +56,6 @@ module.exports = (externalLogger, logFolder, moduleName = "installer")=> {
       // backwards compatible for installer and player modules
       var detailsVal = (typeof detail === "string") ? detail : detail.event_details || "";
 
-      // stringify log details
-      if (detailsVal && typeof detailsVal === "object") { detailsVal = JSON.stringify(detailsVal); }
-      if (userFriendlyMessage && typeof userFriendlyMessage === "object") { userFriendlyMessage = JSON.stringify(userFriendlyMessage); }
-
       if(!fileExists(logFolder)) {
         fs.mkdirSync(logFolder);
       }
@@ -76,6 +72,7 @@ module.exports = (externalLogger, logFolder, moduleName = "installer")=> {
           fs.appendFileSync(detailsLog, getLogDatetime() + "\n");
         }
 
+        if (typeof detailsVal === "object") { detailsVal = JSON.stringify(detailsVal); }
         fs.appendFileSync(detailsLog, detailsVal + "\n");
       }
     }
@@ -108,7 +105,7 @@ module.exports = (externalLogger, logFolder, moduleName = "installer")=> {
       if (externalLogger) {externalLogger.setDisplaySettings(settings);}
     },
     external(evt, detail, table) {
-      appendToLog(evt, detail);
+      appendToLog(detail, evt);
 
       if (externalLogger) {externalLogger.log(evt, detail, table, moduleName);}
     },
