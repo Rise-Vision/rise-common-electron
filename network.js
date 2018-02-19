@@ -47,6 +47,12 @@ function setRequestAgent(dest, opts) {
   return Object.assign({}, {agent}, opts);
 }
 
+function useElectronNet() {
+  const proxyConfig = proxy.configuration();
+
+  return !(proxyConfig && proxyConfig.host);
+}
+
 module.exports = {
   setJavaProxyArgs,
   setNodeAgents(httpAgent, httpsAgent) {
@@ -66,11 +72,7 @@ module.exports = {
   },
   callFetch(dest, opts) {
     return new Promise((resolve, reject)=>{
-      let proxyConfig = proxy.configuration();
-
-      if(proxyConfig && proxyConfig.host) {
-        opts = Object.assign(opts, {useElectronNet: false});
-      }
+      opts = Object.assign({}, opts, {useElectronNet: useElectronNet()});
 
       got(dest, opts).then(response => {
         let text = () => {return Promise.resolve(response.body.toString())};
@@ -123,12 +125,7 @@ module.exports = {
 
       log.debug(`Downloading${originalUrl}`);
 
-      let moreOpts = {retries: 4};
-      let proxyConfig = proxy.configuration();
-
-      if(proxyConfig && proxyConfig.host) {
-        moreOpts = Object.assign(moreOpts, {useElectronNet: false});
-      }
+      const moreOpts = {retries: 4, useElectronNet: useElectronNet()};
 
       got.stream(setRequestAgent(downloadUrl, opts),moreOpts).on("error", (e, body, resp) => {
         withError = true;
