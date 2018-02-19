@@ -28,3 +28,5 @@ node_modules
 test/test-results.xml
 test/RiseCache.zip
 test/unit/.test-failed-log-entries.json
+test/integration/test-file.txt
+testdir1
