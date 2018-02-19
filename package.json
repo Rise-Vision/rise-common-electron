@@ -33,8 +33,8 @@
     "windows-shortcuts": "git://github.com/Rise-Vision/windows-shortcuts.git"
   },
   "scripts": {
-    "test": "istanbul cover node_modules/mocha/bin/_mocha -r ./test/init.js -- --timeout 20000 --reporter mocha-junit-reporter --reporter-options mochaFile=test/test-results.xml --recursive test/unit",
-    "test-no-coverage": "mocha --timeout 40000 -r ./test/init.js --recursive test/unit",
+    "test": "rimraf test/unit/.test-failed-log-entries.json && istanbul cover node_modules/mocha/bin/_mocha -r ./test/init.js -- --timeout 20000 --reporter mocha-junit-reporter --reporter-options mochaFile=test/test-results.xml --recursive test/unit",
+    "test-no-coverage": "rimraf test/unit/.test-failed-log-entries.json && mocha --timeout 40000 -r ./test/init.js --recursive test/unit",
     "integration": "node_modules/mocha/bin/_mocha --timeout 40000 -r ./test/init.js --recursive test/integration"
   }
 }
