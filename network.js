@@ -72,7 +72,7 @@ module.exports = {
   },
   callFetch(dest, opts) {
     return new Promise((resolve, reject)=>{
-      opts = Object.assign(opts, {useElectronNet: useElectronNet()});
+      opts = Object.assign({}, opts, {useElectronNet: useElectronNet()});
 
       got(dest, opts).then(response => {
         let text = () => {return Promise.resolve(response.body.toString())};
