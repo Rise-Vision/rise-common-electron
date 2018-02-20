@@ -44,10 +44,17 @@ function setJavaProxyArgs(fields) {
 function setRequestAgent(dest, opts) {
   let agent = dest.indexOf("https:") > -1 ? fetchAgents.httpsAgent : fetchAgents.httpAgent;
 
-  return Object.assign({}, {agent}, opts);
+  return Object.assign({agent}, opts);
+}
+
+function getProxyHost() {
+  let proxyConfig = proxy.configuration();
+
+  return proxyConfig && proxyConfig.host;
 }
 
 module.exports = {
+  getProxyHost,
   setJavaProxyArgs,
   setNodeAgents(httpAgent, httpsAgent) {
     fetchAgents = {
@@ -66,10 +73,12 @@ module.exports = {
   },
   callFetch(dest, opts) {
     return new Promise((resolve, reject)=>{
-      let proxyConfig = proxy.configuration();
-
-      if(proxyConfig && proxyConfig.host) {
-        opts = Object.assign(opts, {useElectronNet: false});
+      if(module.exports.getProxyHost()) {
+        opts = Object.assign({}, opts, {useElectronNet: false});
+      }
+      else if(!opts || opts.useElectronNet !== false) {
+        // GOT 8.0 changed the default for useElectronNet, so if not provided we have to ensure to set it as in previous versions
+        opts = Object.assign({}, opts, {useElectronNet: true});
       }
 
       got(dest, opts).then(response => {
@@ -123,14 +132,12 @@ module.exports = {
 
       log.debug(`Downloading${originalUrl}`);
 
-      let moreOpts = {retries: 4};
-      let proxyConfig = proxy.configuration();
+      let moreOpts = {
+        retries: 4,
+        useElectronNet: !module.exports.getProxyHost()
+      };
 
-      if(proxyConfig && proxyConfig.host) {
-        moreOpts = Object.assign(moreOpts, {useElectronNet: false});
-      }
-
-      got.stream(setRequestAgent(downloadUrl, opts),moreOpts).on("error", (e, body, resp) => {
+      got.stream(setRequestAgent(downloadUrl, opts), moreOpts).on("error", (e, body, resp) => {
         withError = true;
         file.end();
         reject({ message: "Response error downloading file " + e.message, error: e });
