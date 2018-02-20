@@ -44,7 +44,7 @@ function setJavaProxyArgs(fields) {
 function setRequestAgent(dest, opts) {
   let agent = dest.indexOf("https:") > -1 ? fetchAgents.httpsAgent : fetchAgents.httpAgent;
 
-  return Object.assign({}, {agent}, opts);
+  return Object.assign({agent}, opts);
 }
 
 module.exports = {
@@ -69,7 +69,11 @@ module.exports = {
       let proxyConfig = proxy.configuration();
 
       if(proxyConfig && proxyConfig.host) {
-        opts = Object.assign(opts, {useElectronNet: false});
+        opts = Object.assign({}, opts, {useElectronNet: false});
+      }
+      else if(!opts || !opts.hasOwnProperty('useElectronNet')) {
+        // GOT 8.0 changed the default for useElectronNet, so if not provided we have to ensure to set it as in previous versions
+        opts = Object.assign({}, opts, {useElectronNet: true});
       }
 
       got(dest, opts).then(response => {
@@ -123,7 +127,7 @@ module.exports = {
 
       log.debug(`Downloading${originalUrl}`);
 
-      let moreOpts = {retries: 4};
+      let moreOpts = {retries: 4, useElectronNet: true};
       let proxyConfig = proxy.configuration();
 
       if(proxyConfig && proxyConfig.host) {
