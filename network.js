@@ -161,11 +161,13 @@ module.exports = {
   },
   getMAC() {
     try {
-      let interfaces = os.networkInterfaces();
+      const interfaces = os.networkInterfaces();
 
-      return Object.keys(interfaces)
+      const ipv4Address = Object.keys(interfaces)
       .reduce((addresses, key)=>addresses.concat(interfaces[key]), [])
-      .filter(address=>!address.internal && address.family === "IPv4")[0].mac
+      .find(address=>!address.internal && address.family === "IPv4");
+
+      return ipv4Address ? ipv4Address.mac : null;
     } catch(e) {
       log.all(e);
       return null;
