@@ -1,7 +1,7 @@
 var fs = require("fs"),
 path = require("path"),
 debugging = process.argv.slice(1).join(" ").indexOf("debug") > -1,
-debug = (debugging ? (msg)=>{console.log(msg);} : ()=>{});
+debug = (debugging ? console.log.bind(console) : ()=>{});
 
 module.exports = (externalLogger, logFolder, moduleName = "installer")=> {
   var uiWindow;
