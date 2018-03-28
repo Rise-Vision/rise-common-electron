@@ -47,6 +47,26 @@ describe("Logger", ()=>{
     require("../../logger.js")({}, "installDir").resetLogFiles();
     assert(!fs.truncate.callCount);
   });
+
+  it("doesn't throw if logging to file with no detail", ()=>{
+    simpleMock.mock(fs, "statSync").throwWith("ENOENT test");
+    simpleMock.mock(fs, "truncate").returnWith();
+    simpleMock.mock(fs, "mkdirSync").returnWith();
+    simpleMock.mock(fs, "appendFileSync").returnWith();
+    require("../../logger.js")({}, "installDir").file(null, "user-message");
+    assert.equal(fs.appendFileSync.callCount, 1);
+    assert(fs.appendFileSync.lastCall.args[1].includes("user-message"));
+  });
+
+  it("logs detail if included", ()=>{
+    simpleMock.mock(fs, "statSync").throwWith("ENOENT test");
+    simpleMock.mock(fs, "truncate").returnWith();
+    simpleMock.mock(fs, "mkdirSync").returnWith();
+    simpleMock.mock(fs, "appendFileSync").returnWith();
+    require("../../logger.js")({}, "installDir").file("some-detail", "user-message");
+    assert.equal(fs.appendFileSync.callCount, 3);
+    assert(fs.appendFileSync.lastCall.args[1].includes("some-detail"));
+  });
 });
 
 describe("launcher", ()=>{

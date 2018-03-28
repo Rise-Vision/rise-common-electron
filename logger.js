@@ -54,7 +54,7 @@ module.exports = (externalLogger, logFolder, moduleName = "installer")=> {
       var eventsLog = path.join(logFolder, `${moduleName}-events.log`);
       var detailsLog = path.join(logFolder, `${moduleName}-detail.log`);
       // backwards compatible for installer and player modules
-      var detailsVal = (typeof detail === "string") ? detail : detail.event_details || "";
+      var detailsVal = (typeof detail === "string") ? detail : (detail && detail.event_details) || "";
 
       if(!fileExists(logFolder)) {
         fs.mkdirSync(logFolder);
