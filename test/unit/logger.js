@@ -15,7 +15,7 @@ describe("Logger", ()=>{
   it("resets log files if they're large and no max size was specified", ()=>{
     simpleMock.mock(fs, "statSync").returnWith({size: Infinity});
     simpleMock.mock(fs, "truncate").returnWith();
-    require("../../logger.js")({}, "installDir").resetLogFiles();
+    require("../../logger.js")({}, "installDir", "installer").resetLogFiles();
     assert(fs.truncate.calls[0].args[0].includes(path.join("installDir", "installer-events")));
     assert(fs.truncate.calls[1].args[0].includes(path.join("installDir", "installer-detail")));
   });
@@ -23,28 +23,28 @@ describe("Logger", ()=>{
   it("doesn't reset log files if they're smaller than max allowable", ()=>{
     simpleMock.mock(fs, "statSync").returnWith({size: 50}).returnWith({size: 75});
     simpleMock.mock(fs, "truncate").returnWith();
-    require("../../logger.js")({}, "installDir").resetLogFiles(100);
+    require("../../logger.js")({}, "installDir", "installer").resetLogFiles(100);
     assert.equal(fs.truncate.callCount, 0);
   });
 
   it("resets log files if they're larger than max allowable", ()=>{
     simpleMock.mock(fs, "statSync").returnWith({size: 120}).returnWith({size: 75});
     simpleMock.mock(fs, "truncate").returnWith();
-    require("../../logger.js")({}, "installDir").resetLogFiles(100);
+    require("../../logger.js")({}, "installDir", "installer").resetLogFiles(100);
     assert.equal(fs.truncate.callCount, 1);
   })
 
   it("handles failed attempt to reset log files", ()=>{
     simpleMock.mock(fs, "statSync").returnWith({size: Infinity});
     simpleMock.mock(fs, "truncate").throwWith(new Error("test-truncate-failure"));
-    require("../../logger.js")({}, "installDir").resetLogFiles();
+    require("../../logger.js")({}, "installDir", "installer").resetLogFiles();
     assert(fs.truncate.calls[0].args[0].includes(path.join("installDir", "installer-events")));
   });
 
   it("doesn't reset log files if they don't exist", ()=>{
     simpleMock.mock(fs, "statSync").throwWith("ENOENT test");
     simpleMock.mock(fs, "truncate").returnWith();
-    require("../../logger.js")({}, "installDir").resetLogFiles();
+    require("../../logger.js")({}, "installDir", "installer").resetLogFiles();
     assert(!fs.truncate.callCount);
   });
 

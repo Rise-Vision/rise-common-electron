@@ -3,7 +3,7 @@ path = require("path"),
 debugging = process.argv.slice(1).join(" ").indexOf("debug") > -1,
 debug = (debugging ? console.log.bind(console) : ()=>{});
 
-module.exports = (externalLogger, logFolder, moduleName = "installer")=> {
+module.exports = (externalLogger, logFolder, moduleName = "unknownmodule")=> {
   var uiWindow;
 
   function validUiWindow() {
@@ -36,6 +36,7 @@ module.exports = (externalLogger, logFolder, moduleName = "installer")=> {
   }
 
   function resetLogFiles(maxSize=0) {
+    if (!logFolder) {return;}
     try {
       [`${moduleName}-events.log`,`${moduleName}-detail.log`]
       .forEach((str)=>{
