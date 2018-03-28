@@ -59,10 +59,13 @@ module.exports = (projectName, dataSetName, refreshUrl)=>{
           return res.json();
         })
         .then((json)=>{
-          if(!json.insertErrors || json.insertErrors.length === 0)
-            return Promise.resolve();
-          else
+          if(json.insertErrors && json.insertErrors.length) {
             return Promise.reject(json.insertErrors);
+          } else if (json.error && json.error.message) {
+            return Promise.reject(json.error.message);
+          } else {
+            return Promise.resolve();
+          }
         });
       });
     }
