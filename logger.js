@@ -1,7 +1,7 @@
 var fs = require("fs"),
 path = require("path"),
 debugging = process.argv.slice(1).join(" ").indexOf("debug") > -1,
-debug = (debugging ? (msg)=>{console.log(msg);} : ()=>{});
+debug = (debugging ? console.log.bind(console) : ()=>{});
 
 module.exports = (externalLogger, logFolder, moduleName = "installer")=> {
   var uiWindow;
@@ -54,7 +54,7 @@ module.exports = (externalLogger, logFolder, moduleName = "installer")=> {
       var eventsLog = path.join(logFolder, `${moduleName}-events.log`);
       var detailsLog = path.join(logFolder, `${moduleName}-detail.log`);
       // backwards compatible for installer and player modules
-      var detailsVal = (typeof detail === "string") ? detail : detail.event_details || "";
+      var detailsVal = (typeof detail === "string") ? detail : (detail && detail.event_details) || "";
 
       if(!fileExists(logFolder)) {
         fs.mkdirSync(logFolder);
