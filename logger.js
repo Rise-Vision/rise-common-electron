@@ -91,6 +91,12 @@ module.exports = (externalLogger, logFolder, moduleName = "unknownmodule")=> {
       if (externalLogger) {externalLogger.log("error", detail, table, moduleName);}
       if (validUiWindow()) {uiWindow.send("errorMessage", userFriendlyMessage || detail);}
     },
+    warning(detail, table) {
+      debug("WARNING: " + detail);
+      appendToLog(detail);
+
+      if (externalLogger) {externalLogger.log("warning", detail, table, moduleName);}
+    },
     all(evt, detail, pct, table) {
       debug(evt, detail ? detail : "");
       appendToLog(detail, evt);
