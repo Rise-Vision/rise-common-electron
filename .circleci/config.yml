@@ -1,0 +1,21 @@
+version: 2.1
+
+jobs:
+  "test":
+    docker: &DOCKERIMAGE
+      - image: jenkinsrise/cci-latest-node-with-gcloud:0.0.1
+    steps:
+      - checkout
+      - run: npm install
+      - run:
+          command: |
+            npm install istanbul
+            npm run test
+            npm run integration
+          no_output_timeout: 1m
+
+workflows:
+  version: 2
+  test_and_deploy:
+    jobs:
+      - "test"
