@@ -1,6 +1,6 @@
 {
   "name": "rise-common-electron",
-  "version": "2.2.9",
+  "version": "2.2.10",
   "description": "",
   "main": "index.js",
   "author": "",
@@ -13,19 +13,19 @@
     "url": "https://github.com/Rise-Vision/rise-common-electron/issues"
   },
   "devDependencies": {
-    "express": "^4.13.4",
-    "istanbul": "^0.4.0",
-    "lolex": "^1.5.2",
-    "mocha": "^2.3.3",
-    "mocha-junit-reporter": "^1.9.1",
-    "simple-mock": "^0.4.1"
+    "express": "^4.17.1",
+    "lolex": "^4.2.0",
+    "mocha": "^6.2.0",
+    "mocha-junit-reporter": "^1.23.1",
+    "nyc": "^14.1.1",
+    "simple-mock": "^0.8.0"
   },
   "dependencies": {
     "fs-extra": "git+https://github.com/Rise-Vision/node-fs-extra",
     "got": "^7.0.0",
     "gunzip-maybe": "^1.2.1",
-    "http-proxy-agent": "^1.0.0",
-    "https-proxy-agent": "^1.0.0",
+    "http-proxy-agent": "^2.0.0",
+    "https-proxy-agent": "^2.0.0",
     "mkdirp": "^0.5.1",
     "node-fetch": "1.3.3",
     "rimraf": "2.4.3",
@@ -33,8 +33,8 @@
     "windows-shortcuts": "git://github.com/Rise-Vision/windows-shortcuts.git"
   },
   "scripts": {
-    "test": "istanbul cover node_modules/mocha/bin/_mocha -r ./test/init.js -- --timeout 20000 --reporter mocha-junit-reporter --reporter-options mochaFile=test/test-results.xml --recursive test/unit",
+    "test": "nyc mocha --timeout 20000 -r ./test/init.js --recursive --exit test/unit",
     "test-no-coverage": "mocha --timeout 40000 -r ./test/init.js --recursive test/unit",
-    "integration": "node_modules/mocha/bin/_mocha --timeout 40000 -r ./test/init.js --recursive test/integration"
+    "integration": "node_modules/mocha/bin/_mocha --timeout 40000 -r ./test/init.js --recursive --exit test/integration"
   }
 }
