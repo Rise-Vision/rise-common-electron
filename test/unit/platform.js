@@ -54,12 +54,22 @@ describe("platform", ()=>{
     simpleMock.restore();
     mock(platform, "isWindows").returnWith(false);
     mock(platform, "startProcess").returnWith(true);
+    mock(platform, "getUbuntuVer").returnWith("16.04");
 
     platform.openOSProxySettingsWindow();
     linuxArgs = platform.startProcess.lastCall.args;
-    assert(linuxArgs.length);
+    assert(linuxArgs.length === 2);
+    assert(linuxArgs[0].startsWith("unity"));
 
-    assert(linuxArgs[0] !== windowsArgs[0]);
+    simpleMock.restore();
+    mock(platform, "isWindows").returnWith(false);
+    mock(platform, "startProcess").returnWith(true);
+    mock(platform, "getUbuntuVer").returnWith("18.04");
+
+    platform.openOSProxySettingsWindow();
+    linuxArgs = platform.startProcess.lastCall.args;
+    assert(linuxArgs.length === 2);
+    assert(linuxArgs[0].startsWith("gnome"));
   });
 
   it("waits for 100ms to resolve the promise", ()=>{
