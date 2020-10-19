@@ -81,8 +81,22 @@ module.exports = {
   },
   openOSProxySettingsWindow() {
     let windowsCmd = ["rundll32.exe", ["inetcpl.cpl,LaunchConnectionDialog"]];
-    let linuxCmd = ["unity-control-center", ["network"]];
-    module.exports.startProcess(...(module.exports.isWindows() ? windowsCmd : linuxCmd));
+    let gnomeCmd = ["gnome-control-center", ["network"]];
+    let unityCmd = ["unity-control-center", ["network"]];
+    let unityVersions = ["14", "15", "16", "17"];
+
+    let command = module.exports.isWindows() ? windowsCmd:
+      unityVersions.includes(majorVersion()) ? unityCmd:
+      gnomeCmd;
+
+
+    module.exports.startProcess(...command);
+
+    function majorVersion() {
+      let version = module.exports.getUbuntuVer();
+
+      return String(version).split(".")[0];
+    }
   },
   getAutoStartupPath() {
     if(module.exports.isWindows()) {
