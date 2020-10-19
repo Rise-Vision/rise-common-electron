@@ -27,7 +27,7 @@
     "http-proxy-agent": "^2.0.0",
     "https-proxy-agent": "^2.2.4",
     "mkdirp": "^0.5.3",
-    "node-fetch": "1.3.3",
+    "node-fetch": "2.6.1",
     "rimraf": "2.4.3",
     "tar-fs": "^2.0.0",
     "windows-shortcuts": "git://github.com/Rise-Vision/windows-shortcuts.git"
