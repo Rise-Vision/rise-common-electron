@@ -30,7 +30,7 @@
     "node-fetch": "2.6.1",
     "rimraf": "2.4.3",
     "tar-fs": "^2.0.0",
-    "windows-shortcuts": "git://github.com/Rise-Vision/windows-shortcuts.git"
+    "windows-shortcuts": "git+https://github.com/Rise-Vision/windows-shortcuts.git"
   },
   "scripts": {
     "test": "nyc mocha --timeout 20000 -r ./test/init.js --recursive --exit test/unit",
