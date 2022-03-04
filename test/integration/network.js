@@ -42,7 +42,7 @@ describe("Network", function() {
     return network.downloadFile(`http://localhost:${badPort}/${fileName}`)
     .then((error)=>{console.log(error)})
     .catch((error)=>{
-      assert.equal(error.message, "Response error downloading file connect ECONNREFUSED 127.0.0.1:9875");
+      assert(error.message.includes("ECONNREFUSED"));
     });
   });
 
@@ -95,11 +95,11 @@ describe("Network", function() {
   });
 
   it("gets invalid json message", ()=>{
-    return network.httpFetch("www.google.com.br")
+    return network.httpFetch("http://www.google.com.br")
       .then((resp)=>{
         return resp.json();
       }).catch((error)=>{
-         assert.equal(error.message, "invalid json response body at www.google.com.br reason: Unexpected token < in JSON at position 0");
+         assert(error.message.includes, "invalid json response body");
       });
   });
 

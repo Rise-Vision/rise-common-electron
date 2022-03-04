@@ -108,11 +108,10 @@ module.exports = {
 
     function tryDownload(downloadUrl) {
       var file = fs.createWriteStream(savePath);
-      var opts = url.parse(downloadUrl);
       var withError = false;
 
       file.on("error", (err)=>{
-        reject({ message: "Error creating temporary download file", error: err });
+        reject({ message: `Error creating temporary download file ${process.cwd()}/${savePath}`, error: err });
       });
 
       file.on("finish", ()=> {
@@ -121,16 +120,16 @@ module.exports = {
         }
       });
 
-      log.debug(`Downloading${originalUrl}`);
+      log.debug(`Downloading ${originalUrl}`);
 
-      let moreOpts = {retries: 4};
+      let opts = {retries: 4};
       let proxyConfig = proxy.configuration();
 
       if(proxyConfig && proxyConfig.host) {
-        moreOpts = Object.assign(moreOpts, {useElectronNet: false});
+        opts = Object.assign(opts, {useElectronNet: false});
       }
 
-      got.stream(setRequestAgent(downloadUrl, opts),moreOpts).on("error", (e, body, resp) => {
+      got.stream(downloadUrl, setRequestAgent(downloadUrl, opts)).on("error", (e, body, resp) => {
         withError = true;
         file.end();
         reject({ message: "Response error downloading file " + e.message, error: e });
