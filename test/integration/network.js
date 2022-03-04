@@ -99,7 +99,7 @@ describe("Network", function() {
       .then((resp)=>{
         return resp.json();
       }).catch((error)=>{
-         assert(error.message.includes, "invalid json response body");
+         assert(error.message.includes("invalid json response body"));
       });
   });
 
