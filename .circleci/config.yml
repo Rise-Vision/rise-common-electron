@@ -6,6 +6,7 @@ jobs:
       - image: jenkinsrise/cci-latest-node-with-gcloud:0.0.1
     steps:
       - checkout
+      - run: node --version && npm --version
       - run: npm install
       - run: npm run test
       - run: npm run integration
