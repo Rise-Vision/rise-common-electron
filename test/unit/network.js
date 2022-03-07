@@ -35,8 +35,8 @@ describe("network", ()=>{
     return network.downloadFile("http://install-versions.risevision.com/RiseCache.zip", path.join("providedTestPath", "RiseCache.zip"))
       .then((localPath)=>{
         assert.equal(got.stream.lastCall.args[0], "http://install-versions.risevision.com/RiseCache.zip");
-        assert.equal(got.stream.lastCall.args[1].agent, null);
-        assert.equal(got.stream.lastCall.args[1].retries, 4);
+        assert.equal(got.stream.lastCall.args[1].agent.http, null);
+        assert.equal(got.stream.lastCall.args[1].retry.limit, 4);
         assert.equal(localPath, path.join("providedTestPath", "RiseCache.zip"));
       });
   });
@@ -50,7 +50,7 @@ describe("network", ()=>{
 
     return network.downloadFile("http://install-versions.risevision.com/RiseCache.zip", path.join("providedTestPath", "RiseCache.zip"))
       .then(()=>{
-        assert.equal(got.stream.lastCall.args[1].agent, agentHTTP);
+        assert.equal(got.stream.lastCall.args[1].agent.http, agentHTTP);
       });
   });
 
@@ -63,7 +63,7 @@ describe("network", ()=>{
 
     return network.downloadFile("https://install-versions.risevision.com/RiseCache.zip", path.join("providedTestPath", "RiseCache.zip"))
     .then(()=>{
-      assert.equal(got.stream.lastCall.args[1].agent, agentHTTPS);
+      assert.equal(got.stream.lastCall.args[1].agent.https, agentHTTPS);
     });
   });
 
