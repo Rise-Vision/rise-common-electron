@@ -34,10 +34,8 @@ describe("network", ()=>{
 
     return network.downloadFile("http://install-versions.risevision.com/RiseCache.zip", path.join("providedTestPath", "RiseCache.zip"))
       .then((localPath)=>{
-        assert.equal(got.stream.lastCall.args[0].protocol, "http:");
-        assert.equal(got.stream.lastCall.args[0].hostname, "install-versions.risevision.com");
-        assert.equal(got.stream.lastCall.args[0].path, "/RiseCache.zip");
-        assert.equal(got.stream.lastCall.args[0].agent, null);
+        assert.equal(got.stream.lastCall.args[0], "http://install-versions.risevision.com/RiseCache.zip");
+        assert.equal(got.stream.lastCall.args[1].agent, null);
         assert.equal(got.stream.lastCall.args[1].retries, 4);
         assert.equal(localPath, path.join("providedTestPath", "RiseCache.zip"));
       });
@@ -52,7 +50,7 @@ describe("network", ()=>{
 
     return network.downloadFile("http://install-versions.risevision.com/RiseCache.zip", path.join("providedTestPath", "RiseCache.zip"))
       .then(()=>{
-        assert.equal(got.stream.lastCall.args[0].agent, agentHTTP);
+        assert.equal(got.stream.lastCall.args[1].agent, agentHTTP);
       });
   });
 
@@ -65,7 +63,7 @@ describe("network", ()=>{
 
     return network.downloadFile("https://install-versions.risevision.com/RiseCache.zip", path.join("providedTestPath", "RiseCache.zip"))
     .then(()=>{
-      assert.equal(got.stream.lastCall.args[0].agent, agentHTTPS);
+      assert.equal(got.stream.lastCall.args[1].agent, agentHTTPS);
     });
   });
 

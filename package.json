@@ -1,6 +1,6 @@
 {
   "name": "rise-common-electron",
-  "version": "2.3.1",
+  "version": "3.0.0",
   "description": "",
   "main": "index.js",
   "author": "",
@@ -22,12 +22,11 @@
   },
   "dependencies": {
     "fs-extra": "git+https://github.com/Rise-Vision/node-fs-extra",
-    "got": "^7.0.0",
+    "got": "^11.0.0",
     "gunzip-maybe": "^1.2.1",
     "http-proxy-agent": "^2.0.0",
     "https-proxy-agent": "^2.2.4",
     "mkdirp": "^0.5.3",
-    "node-fetch": "2.6.1",
     "rimraf": "2.4.3",
     "tar-fs": "^2.0.0",
     "windows-shortcuts": "git+https://github.com/Rise-Vision/windows-shortcuts.git"
