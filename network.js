@@ -42,9 +42,7 @@ function setJavaProxyArgs(fields) {
 }
 
 function setRequestAgent(dest, opts) {
-  let agent = dest.indexOf("https:") > -1 ? fetchAgents.httpsAgent : fetchAgents.httpAgent;
-
-  return Object.assign({}, {agent}, opts);
+  return Object.assign({}, {agent: {http: fetchAgents.httpAgent, https: fetchAgents.httpsAgent}}, opts);
 }
 
 module.exports = {
@@ -122,7 +120,7 @@ module.exports = {
 
       log.debug(`Downloading ${originalUrl}`);
 
-      let opts = {retries: 4};
+      let opts = {retry: {limit: 4}};
       let proxyConfig = proxy.configuration();
 
       if(proxyConfig && proxyConfig.host) {
