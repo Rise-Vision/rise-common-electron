@@ -1,6 +1,6 @@
 {
   "name": "rise-common-electron",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "",
   "main": "index.js",
   "author": "",
@@ -24,8 +24,8 @@
     "fs-extra": "git+https://github.com/Rise-Vision/node-fs-extra",
     "got": "^11.0.0",
     "gunzip-maybe": "^1.2.1",
-    "http-proxy-agent": "^2.0.0",
-    "https-proxy-agent": "^2.2.4",
+    "http-proxy-agent": "^5.0.0",
+    "https-proxy-agent": "^5.0.0",
     "mkdirp": "^0.5.3",
     "rimraf": "2.4.3",
     "tar-fs": "^2.0.0",
