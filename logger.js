@@ -42,7 +42,7 @@ module.exports = (externalLogger, logFolder, moduleName = "unknownmodule")=> {
       .forEach((str)=>{
         let filePath = path.join(logFolder, str);
         if (fs.statSync(filePath).size < maxSize) {return;}
-        fs.truncate(filePath);
+        fs.truncate(filePath, err=>debug("could not truncate", filePath));
       });
     } catch(e) {debug(e.stack);}
   }
