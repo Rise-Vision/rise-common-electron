@@ -67,6 +67,30 @@ describe("Logger", ()=>{
     assert.equal(fs.appendFileSync.callCount, 3);
     assert(fs.appendFileSync.lastCall.args[1].includes("some-detail"));
   });
+
+  it("extracts detail from event_details", ()=>{
+    simpleMock.mock(fs, "statSync").throwWith("ENOENT test");
+    simpleMock.mock(fs, "truncate").returnWith();
+    simpleMock.mock(fs, "mkdirSync").returnWith();
+    simpleMock.mock(fs, "appendFileSync").returnWith();
+    require("../../logger.js")({}, "installDir").file({
+      "event_details": "some-detail"
+    }, "user-message");
+    assert.equal(fs.appendFileSync.callCount, 3);
+    assert(fs.appendFileSync.lastCall.args[1].includes("some-detail"));
+  });
+
+  it("extracts detail from eventDetails", ()=>{
+    simpleMock.mock(fs, "statSync").throwWith("ENOENT test");
+    simpleMock.mock(fs, "truncate").returnWith();
+    simpleMock.mock(fs, "mkdirSync").returnWith();
+    simpleMock.mock(fs, "appendFileSync").returnWith();
+    require("../../logger.js")({}, "installDir").file({
+      "eventDetails": "some-detail"
+    }, "user-message");
+    assert.equal(fs.appendFileSync.callCount, 3);
+    assert(fs.appendFileSync.lastCall.args[1].includes("some-detail"));
+  });
 });
 
 describe("launcher", ()=>{
