@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "fs-extra": "git+https://github.com/Rise-Vision/node-fs-extra",
-    "got": "^11.0.0",
+    "got": "^11.8.5",
     "gunzip-maybe": "^1.2.1",
     "http-proxy-agent": "^5.0.0",
     "https-proxy-agent": "^5.0.0",
