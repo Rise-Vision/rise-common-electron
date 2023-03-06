@@ -15,7 +15,7 @@
   "devDependencies": {
     "express": "^4.17.1",
     "lolex": "^4.2.0",
-    "mocha": "^7.1.1",
+    "mocha": "^10.2.0",
     "mocha-junit-reporter": "^1.23.1",
     "nyc": "^15.0.0",
     "simple-mock": "^0.8.0"
