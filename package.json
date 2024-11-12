@@ -13,22 +13,22 @@
     "url": "https://github.com/Rise-Vision/rise-common-electron/issues"
   },
   "devDependencies": {
-    "express": "^4.17.1",
+    "express": "^4.19.2",
     "lolex": "^4.2.0",
-    "mocha": "^7.1.1",
-    "mocha-junit-reporter": "^1.23.1",
-    "nyc": "^15.0.0",
+    "mocha": "^7.2.0",
+    "mocha-junit-reporter": "^1.23.3",
+    "nyc": "^15.1.0",
     "simple-mock": "^0.8.0"
   },
   "dependencies": {
     "fs-extra": "git+https://github.com/Rise-Vision/node-fs-extra",
-    "got": "^11.0.0",
-    "gunzip-maybe": "^1.2.1",
+    "got": "^11.8.6",
+    "gunzip-maybe": "^1.4.2",
     "http-proxy-agent": "^5.0.0",
-    "https-proxy-agent": "^5.0.0",
-    "mkdirp": "^0.5.3",
-    "rimraf": "2.4.3",
-    "tar-fs": "^2.0.0",
+    "https-proxy-agent": "^5.0.1",
+    "mkdirp": "^0.5.6",
+    "rimraf": "2.7.1",
+    "tar-fs": "^2.1.1",
     "windows-shortcuts": "git+https://github.com/Rise-Vision/windows-shortcuts.git"
   },
   "scripts": {
