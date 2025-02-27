@@ -220,7 +220,7 @@ module.exports = {
     let captionArgs = ["os", "get", "Caption", "/format:list"];
     const caption = childProcess.spawnSync("wmic", captionArgs).stdout;
 
-    if (!caption) return "";
+    if (!caption) return "Windows";
 
     return caption.toString().trim().split("=")[1];
   },
