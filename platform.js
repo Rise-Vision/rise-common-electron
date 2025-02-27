@@ -230,7 +230,7 @@ module.exports = {
 
       return splitCaption[1];
     } catch (e) {
-      log.error("Error getting Windows OS caption: " + e);
+      log.file("Error getting Windows OS caption: " + e);
       return DEFAULT;
     }
   },
