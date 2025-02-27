@@ -228,7 +228,7 @@ module.exports = {
 
       if (splitCaption.length < 2) return DEFAULT;
 
-      return caption.toString().trim().split("=")[1];
+      return splitCaption[1];
     } catch (e) {
       log.error("Error getting Windows OS caption: " + e);
       return DEFAULT;
