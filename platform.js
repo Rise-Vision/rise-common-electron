@@ -217,11 +217,12 @@ module.exports = {
     }
   },
   getWindowsOSCaption() {
-    let captionArgs = ["os", "get", "Caption", "/format:list"],
-    caption = childProcess.spawnSync("wmic", captionArgs)
-    .stdout.toString().trim().split("=")[1];
+    let captionArgs = ["os", "get", "Caption", "/format:list"];
+    const caption = childProcess.spawnSync("wmic", captionArgs).stdout;
 
-    return  caption;
+    if (!caption) return "";
+
+    return caption.toString().trim().split("=")[1];
   },
   readTextFile(path, options = {}) {
     let fsModule = options.inASAR ? electronFS : fs;
