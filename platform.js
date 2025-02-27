@@ -217,12 +217,22 @@ module.exports = {
     }
   },
   getWindowsOSCaption() {
-    let captionArgs = ["os", "get", "Caption", "/format:list"];
-    const caption = childProcess.spawnSync("wmic", captionArgs).stdout;
+    const DEFAULT = "Microsoft Windows";
+    try {
+      let captionArgs = ["os", "get", "Caption", "/format:list"];
+      const caption = childProcess.spawnSync("wmic", captionArgs).stdout;
 
-    if (!caption) return "Windows";
+      if (!caption) return DEFAULT;
 
-    return caption.toString().trim().split("=")[1];
+      const splitCaption = caption.toString().trim().split("=");
+
+      if (splitCaption.length < 2) return DEFAULT;
+
+      return caption.toString().trim().split("=")[1];
+    } catch (e) {
+      log.error("Error getting Windows OS caption: " + e);
+      return DEFAULT;
+    }
   },
   readTextFile(path, options = {}) {
     let fsModule = options.inASAR ? electronFS : fs;
