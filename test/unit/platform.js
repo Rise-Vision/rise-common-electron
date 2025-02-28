@@ -628,15 +628,20 @@ describe("platform", ()=>{
   });
 
   it("Retrieves the windows os description", ()=>{
-    const osFlavor = "Microsoft Windows 10 Pro"
-    const mockResponse = `Caption=${osFlavor}`
+    const osFlavor = "Microsoft Windows 10 Pro";
+    const mockResponse = `Caption=${osFlavor}`;
     mock(childProcess, "spawnSync").returnWith({ stdout: mockResponse });
-    assert.equal(platform.getWindowsOSCaption(), "Microsoft Windows 10 Pro")
+    assert.equal(platform.getWindowsOSCaption(), "Microsoft Windows 10 Pro");
   });
 
   it("Retrieves a default windows os description", ()=>{
-    const mockResponse = "Microsoft Windows"
+    const mockResponse = "Microsoft Windows";
     mock(childProcess, "spawnSync").returnWith({ stdout: mockResponse });
-    assert.equal(platform.getWindowsOSCaption(), "Microsoft Windows")
+    assert.equal(platform.getWindowsOSCaption(), "Microsoft Windows");
+  });
+
+  it("Handles errors when retrieving windows os description", ()=>{
+    mock(childProcess, "spawnSync").throwWith(new Error("Command failed"));
+    assert.equal(platform.getWindowsOSCaption(), "Microsoft Windows");
   });
 });
