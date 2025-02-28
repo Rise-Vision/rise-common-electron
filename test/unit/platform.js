@@ -626,4 +626,17 @@ describe("platform", ()=>{
     platform.launchExplorer();
     assert.deepEqual(platform.startProcess.lastCall.args[3].env, originalEnv);
   });
+
+  it("Retrieves the windows os description", ()=>{
+    const osFlavor = "Microsoft Windows 10 Pro"
+    const mockResponse = `Caption=${osFlavor}`
+    mock(childProcess, "spawnSync").returnWith({ stdout: mockResponse });
+    assert.equal(platform.getWindowsOSCaption(), "Microsoft Windows 10 Pro")
+  });
+
+  it("Retrieves a default windows os description", ()=>{
+    const mockResponse = "Microsoft Windows"
+    mock(childProcess, "spawnSync").returnWith({ stdout: mockResponse });
+    assert.equal(platform.getWindowsOSCaption(), "Microsoft Windows")
+  });
 });
