@@ -234,6 +234,26 @@ module.exports = {
       return DEFAULT;
     }
   },
+  getWindowsInstallationMode() {
+    const DEFAULT = "Single";
+    try {
+      const localAppDataPath = path.join(process.env.LOCALAPPDATA, "rvplayer");
+      const programFilesPath = path.join(process.env[process.arch === "x64" ? "ProgramFiles" : "ProgramFiles(x86)"], "rvplayer");
+      
+      if (fs.existsSync(programFilesPath)) {
+        return "Multi";
+      }
+      
+      if (fs.existsSync(localAppDataPath)) {
+        return "Single";
+      }
+      
+      return DEFAULT;
+    } catch (e) {
+      log.file("Error getting Windows installation mode: " + e);
+      return DEFAULT;
+    }
+  },
   readTextFile(path, options = {}) {
     let fsModule = options.inASAR ? electronFS : fs;
 
