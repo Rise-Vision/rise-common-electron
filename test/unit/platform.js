@@ -644,4 +644,65 @@ describe("platform", ()=>{
     mock(childProcess, "spawnSync").throwWith(new Error("Command failed"));
     assert.equal(platform.getWindowsOSCaption(), "Microsoft Windows");
   });
+
+  describe("getWindowsInstallationMode", ()=>{
+    let existsSyncMock;
+
+    beforeEach(()=>{
+      mock(platform, "isWindows").returnWith(true);
+      mock(platform, "getArch").returnWith("x64");
+      existsSyncMock = mock(fs, "existsSync");
+      process.env.LOCALAPPDATA = "C:\\Users\\TestUser\\AppData\\Local";
+      process.env.ProgramFiles = "C:\\Program Files";
+      process.env["ProgramFiles(x86)"] = "C:\\Program Files (x86)";
+    });
+
+    afterEach(()=>{
+      delete process.env.LOCALAPPDATA;
+      delete process.env.ProgramFiles;
+      delete process.env["ProgramFiles(x86)"];
+    });
+
+    it("returns Single when installed in LocalAppData", ()=>{
+      const localAppDataPath = path.join(process.env.LOCALAPPDATA, "rvplayer");
+      existsSyncMock.callFn((path) => {
+        return path === localAppDataPath;
+      });
+
+      assert.equal(platform.getWindowsInstallationMode(), "Single");
+    });
+
+    it("returns Multi when installed in Program Files (x64)", ()=>{
+      mock(platform, "getArch").returnWith("x64");
+      const programFilesPath = path.join(process.env.ProgramFiles, "rvplayer");
+      existsSyncMock.callFn((path) => {
+        return path === programFilesPath;
+      });
+
+      assert.equal(platform.getWindowsInstallationMode(), "Multi");
+    });
+
+    it("returns Multi when installed in Program Files (x86)", ()=>{
+      mock(platform, "getArch").returnWith("x32");
+      const programFilesPath = path.join(process.env["ProgramFiles(x86)"], "rvplayer");
+
+      existsSyncMock.callFn((path) => {
+        return path === programFilesPath;
+      });
+
+      const result = platform.getWindowsInstallationMode();
+      assert.equal(result, "Multi");
+    });
+
+    it("returns Single as default when no installation is found", ()=>{
+      existsSyncMock.returnWith(false);
+      assert.equal(platform.getWindowsInstallationMode(), "Single");
+    });
+
+    it("handles errors gracefully and returns Single", ()=>{
+      existsSyncMock.throwWith(new Error("File system error"));
+
+      assert.equal(platform.getWindowsInstallationMode(), "Single");
+    });
+  });
 });
