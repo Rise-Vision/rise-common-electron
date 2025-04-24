@@ -25,6 +25,9 @@ module.exports = {
   getOS() {
     return process.platform;
   },
+  getCwdRoot() {
+    return path.parse(module.exports.getCwd()).root;
+  },
   getArch() {
     return process.arch;
   },
@@ -119,11 +122,16 @@ module.exports = {
     tries -= 1;
 
     try {
-      let child = childProcess.spawn(command, args, Object.assign({}, opts, {
-        cwd: path.dirname(command),
+      const spawnOpts = Object.assign({}, opts, {
+        cwd: opts.cwd || path.dirname(command),
         stdio: "ignore",
         detached: true
-      }));
+      });
+
+      log.file(`Spawning ${command} ${args} ${JSON.stringify(spawnOpts)}`);
+
+      let child = childProcess.spawn(command, args, spawnOpts);
+
       child.on("error", handleError);
       child.unref();
     } catch(err) {
@@ -133,6 +141,7 @@ module.exports = {
     function handleError(err) {
       if (tries <= 0 || err.code === "ENOENT") {
         log.external("error starting process", require("util").inspect(err));
+        log.file(`error starting process ${err.stack}`);
       } else {
         setTimeout(()=>{
           module.exports.startProcess(command, args, tries);
@@ -190,10 +199,15 @@ module.exports = {
   },
   launchExplorer() {
     if (module.exports.isWindows() && module.exports.getWindowsVersion() !== "7") {
+      const cwd = process.env.SystemRoot ?
+        process.env.SystemRoot :
+        path.join(module.exports.getCwdRoot(), "Windows");
+
+      log.file(`cwd for launch: ${cwd}`);
       try {
-        module.exports.startProcess("cmd", ["/c", "explorer"], 1, {env: initialEnvVars});
+        module.exports.startProcess("cmd", ["/c", "explorer"], 1, {env: initialEnvVars, cwd});
       } catch (err) {
-        log.debug("explorer launch error: " + err);
+        log.file(`explorer launch error: ${err}`);
       }
     }
   },
