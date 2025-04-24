@@ -627,6 +627,28 @@ describe("platform", ()=>{
     assert.deepEqual(platform.startProcess.lastCall.args[3].env, originalEnv);
   });
 
+  it("launches explorer with the proper working directory when systemroot env var present", ()=>{
+    mock(platform, "isWindows").returnWith(true);
+    mock(platform, "getWindowsVersion").returnWith("10");
+    mock(platform, "startProcess").resolveWith();
+
+    process.env.SystemRoot = path.join("C:", "Windows");
+    platform.launchExplorer();
+    assert.deepEqual(platform.startProcess.lastCall.args[3].cwd, path.join("C:", "Windows"));
+  });
+
+  it("launches explorer with the proper working directory when systemroot env var not present", ()=>{
+    mock(platform, "isWindows").returnWith(true);
+    mock(platform, "getWindowsVersion").returnWith("10");
+    mock(platform, "startProcess").resolveWith();
+
+    delete process.env.SystemRoot;
+    mock(platform, "getCwd").returnWith(path.join("C:", "Some", "Subdir"));
+    mock(platform, "getCwdRoot").returnWith(`C:${path.sep}`);
+    platform.launchExplorer();
+    assert.deepEqual(platform.startProcess.lastCall.args[3].cwd, path.join("C:", "Windows"));
+  });
+
   it("Retrieves the windows os description", ()=>{
     const osFlavor = "Microsoft Windows 10 Pro";
     const mockResponse = `Caption=${osFlavor}`;
