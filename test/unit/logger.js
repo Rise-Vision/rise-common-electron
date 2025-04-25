@@ -91,6 +91,34 @@ describe("Logger", ()=>{
     assert.equal(fs.appendFileSync.callCount, 3);
     assert(fs.appendFileSync.lastCall.args[1].includes("some-detail"));
   });
+
+  it("extracts detail from eventDetails and debugInfo", ()=>{
+    simpleMock.mock(fs, "statSync").throwWith("ENOENT test");
+    simpleMock.mock(fs, "truncate").returnWith();
+    simpleMock.mock(fs, "mkdirSync").returnWith();
+    simpleMock.mock(fs, "appendFileSync").returnWith();
+    require("../../logger.js")({}, "installDir").file({
+      "eventDetails": "some-detail",
+      "debugInfo": "some-debug-info"
+    }, "user-message");
+    assert.equal(fs.appendFileSync.callCount, 3);
+    assert(fs.appendFileSync.lastCall.args[1].includes("some-detail"));
+    assert(fs.appendFileSync.lastCall.args[1].includes("some-debug-info"));
+  });
+
+  it("separates eventDetails and debugInfo if userFriendlyMessage is not provided", ()=>{
+    simpleMock.mock(fs, "statSync").throwWith("ENOENT test");
+    simpleMock.mock(fs, "truncate").returnWith();
+    simpleMock.mock(fs, "mkdirSync").returnWith();
+    simpleMock.mock(fs, "appendFileSync").returnWith();
+    require("../../logger.js")({}, "installDir").file({
+      "eventDetails": "some-detail",
+      "debugInfo": "some-debug-info"
+    });
+    assert.equal(fs.appendFileSync.callCount, 3);
+    assert(fs.appendFileSync.calls[1].args[1].includes("some-detail"));
+    assert(fs.appendFileSync.calls[2].args[1].includes("some-debug-info"));
+  });
 });
 
 describe("launcher", ()=>{
