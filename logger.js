@@ -54,20 +54,38 @@ module.exports = (externalLogger, logFolder, moduleName = "unknownmodule")=> {
     try {
       var eventsLog = path.join(logFolder, `${moduleName}-events.log`);
       var detailsLog = path.join(logFolder, `${moduleName}-detail.log`);
+
+      var detailsVal = "";
+      var userFriendlyMessageVal = userFriendlyMessage || "";
+
       // backwards compatible for installer and player modules
-      var detailsVal = (typeof detail === "string") ? detail : (detail && (detail.event_details || detail.eventDetails)) || "";
+      if(typeof detail === "string") {
+        detailsVal = detail;
+      }
+      else if(detail) {
+        const eventDetails = detail.event_details || detail.eventDetails || "";
+        const debugInfo = detail.debug_info || detail.debugInfo || "";
+        const debugInfoVal = (typeof debugInfo === "string") ? debugInfo : JSON.stringify(debugInfo);
+
+        if(!userFriendlyMessageVal) {
+          userFriendlyMessageVal = eventDetails || "";
+          detailsVal = debugInfoVal;
+        } else {
+          detailsVal = `${eventDetails}\n${debugInfoVal}`;
+        }
+      }
 
       if(!fileExists(logFolder)) {
         fs.mkdirSync(logFolder);
       }
 
-      if(userFriendlyMessage) {
-        fs.appendFileSync(eventsLog, getLogDatetime() + " - " + userFriendlyMessage + "\n");
+      if(userFriendlyMessageVal) {
+        fs.appendFileSync(eventsLog, getLogDatetime() + " - " + userFriendlyMessageVal + "\n");
       }
 
       if(detailsVal) {
-        if(userFriendlyMessage) {
-          fs.appendFileSync(detailsLog, getLogDatetime() + " - " + userFriendlyMessage + "\n");
+        if(userFriendlyMessageVal) {
+          fs.appendFileSync(detailsLog, getLogDatetime() + " - " + userFriendlyMessageVal + "\n");
         }
         else {
           fs.appendFileSync(detailsLog, getLogDatetime() + "\n");
