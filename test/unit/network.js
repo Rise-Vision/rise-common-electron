@@ -19,6 +19,7 @@ gotSucess = {
 
 describe("network", ()=>{
   beforeEach("setup mocks", ()=>{
+    fs.mkdirSync(path.join("providedTestPath"), { recursive: true });
     mock(platform, "getTempDir").returnWith("test");
     mock(platform, "writeTextFile").resolveWith();
 
