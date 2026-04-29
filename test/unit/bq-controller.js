@@ -1,7 +1,7 @@
 var assert = require("assert"),
   path = require("path"),
   simple = require("simple-mock"),
-  lolex = require("lolex"),
+  installFakeTimers = require("@sinonjs/fake-timers").install,
   fs = require("fs"),
   bqClient,
   bqController,
@@ -60,7 +60,7 @@ describe("big query insert", function() {
 
   it("failed log entries are logged after time passes", ()=>{
     simple.mock(bqClient, "insert").rejectWith().resolveWith();
-    clock = lolex.install();
+    clock = installFakeTimers();
 
     return bqController.log("testTable", {test:"test"}, new Date())
       .catch(()=>{
@@ -80,7 +80,7 @@ describe("big query insert", function() {
   it("multiple attempts are made to log entries after time passes", ()=>{
     simple.mock(bqClient, "insert").rejectWith().rejectWith().resolveWith();
     nativeTimeout = setTimeout;
-    clock = lolex.install();
+    clock = installFakeTimers();
 
     return bqController.log("testTable", {test:"test"}, new Date())
       .catch(()=>{
@@ -112,7 +112,7 @@ describe("big query insert", function() {
 
   it("persists and retrieves failed entries", ()=>{
     nativeTimeout = setTimeout;
-    clock = lolex.install();
+    clock = installFakeTimers();
 
     bqController = require("../../bq-controller.js")
     ("test-side-events", "Test_Events", ".test-failed-log-entries.json", __dirname);
@@ -144,7 +144,7 @@ describe("big query insert", function() {
 
   it("trims old entries to maintain max queue size", ()=>{
     nativeTimeout = setTimeout;
-    clock = lolex.install();
+    clock = installFakeTimers();
 
     bqController = require("../../bq-controller.js")
     ("test-side-events", "Test_Events", ".test-failed-log-entries.json", __dirname);
