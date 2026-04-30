@@ -1,4 +1,5 @@
 var assert = require("assert"),
+util = require("util"),
 network = require("../../network.js"),
 logger = require("../../logger.js"),
 simple = require("simple-mock"),
@@ -44,7 +45,11 @@ describe("Network", function() {
       assert.fail("expected download to fail but it succeeded");
     })
     .catch((error)=>{
-      assert(error.message.includes("ECONNREFUSED"));
+      var blob = util.inspect(error, { depth: 6 });
+      assert(
+        blob.includes("ECONNREFUSED") || blob.includes("connect ECONNREFUSED"),
+        "expected connection refused, got: " + blob.slice(0, 500)
+      );
     });
   });
 

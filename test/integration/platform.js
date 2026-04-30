@@ -7,13 +7,14 @@ global.log = global.log || {debug(){}};
 describe("Platform", ()=>{
   describe("writeTextFileSync", ()=>{
     it("writes a file, creating directories as required", ()=>{
-      try {fs.unlinkSync(path.join(process.cwd(), "testdir1", "testdir2", "testfile"))}catch(e){}
-      try {fs.rmdir(path.join(process.cwd(), "testdir1", "testdir2"))}catch(e){}
-      try {fs.rmdir(path.join(process.cwd(), "testdir1"))}catch(e){}
-      assert.throws(fs.statSync.bind(null, path.join(process.cwd(), "testdir1")));
+      var root = path.join(process.cwd(), "testdir1");
+      try {
+        fs.rmSync(root, { recursive: true, force: true });
+      } catch (e) { /* absent */ }
+      assert.throws(()=>{ fs.statSync(root); });
 
-      platform.writeTextFileSync(path.join(process.cwd(), "testdir1", "testdir2", "testfile"), "test-text");
-      assert.equal(fs.readFileSync(path.join(process.cwd(), "testdir1", "testdir2", "testfile")), "test-text");
+      platform.writeTextFileSync(path.join(root, "testdir2", "testfile"), "test-text");
+      assert.equal(fs.readFileSync(path.join(root, "testdir2", "testfile")), "test-text");
     });
   });
 });

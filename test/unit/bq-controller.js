@@ -1,12 +1,25 @@
 var assert = require("assert"),
+  path = require("path"),
   simple = require("simple-mock"),
-  lolex = require("lolex"),
+  installFakeTimers = require("@sinonjs/fake-timers").install,
   fs = require("fs"),
   bqClient,
-  bqController;
+  bqController,
+  clock,
+  nativeTimeout;
+
+var FAILED_LOG_FIXTURE = path.join(__dirname, ".test-failed-log-entries.json");
+
+function resetFailedLogFixture() {
+  try {
+    fs.unlinkSync(FAILED_LOG_FIXTURE);
+  } catch (e) { /* absent */ }
+  delete require.cache[FAILED_LOG_FIXTURE];
+}
 
 describe("big query insert", function() {
   beforeEach("setup", ()=> {
+    resetFailedLogFixture();
     simple.mock(fs, "writeFile").returnWith();
 
     bqController = require("../../bq-controller.js")
@@ -18,6 +31,12 @@ describe("big query insert", function() {
   });
 
   afterEach(()=>{
+    if (clock) {
+      try {
+        clock.uninstall();
+      } catch (e) { /* already uninstalled */ }
+      clock = null;
+    }
     simple.restore();
   });
 
@@ -41,7 +60,7 @@ describe("big query insert", function() {
 
   it("failed log entries are logged after time passes", ()=>{
     simple.mock(bqClient, "insert").rejectWith().resolveWith();
-    clock = lolex.install();
+    clock = installFakeTimers();
 
     return bqController.log("testTable", {test:"test"}, new Date())
       .catch(()=>{
@@ -61,7 +80,7 @@ describe("big query insert", function() {
   it("multiple attempts are made to log entries after time passes", ()=>{
     simple.mock(bqClient, "insert").rejectWith().rejectWith().resolveWith();
     nativeTimeout = setTimeout;
-    clock = lolex.install();
+    clock = installFakeTimers();
 
     return bqController.log("testTable", {test:"test"}, new Date())
       .catch(()=>{
@@ -93,7 +112,7 @@ describe("big query insert", function() {
 
   it("persists and retrieves failed entries", ()=>{
     nativeTimeout = setTimeout;
-    clock = lolex.install();
+    clock = installFakeTimers();
 
     bqController = require("../../bq-controller.js")
     ("test-side-events", "Test_Events", ".test-failed-log-entries.json", __dirname);
@@ -114,7 +133,9 @@ describe("big query insert", function() {
             assert.equal(fs.writeFile.callCount, 1);
             assert(fs.writeFile.lastCall.args[0].includes(__dirname));
             assert(fs.writeFile.lastCall.args[0].includes(".json"));
-            assert(JSON.parse(fs.writeFile.lastCall.args[1])[0][1].test);
+            var persisted = JSON.parse(fs.writeFile.lastCall.args[1]);
+            var firstRow = Object.values(persisted)[0];
+            assert(firstRow[1].test);
             res();
           }, 100);
         });
@@ -123,7 +144,7 @@ describe("big query insert", function() {
 
   it("trims old entries to maintain max queue size", ()=>{
     nativeTimeout = setTimeout;
-    clock = lolex.install();
+    clock = installFakeTimers();
 
     bqController = require("../../bq-controller.js")
     ("test-side-events", "Test_Events", ".test-failed-log-entries.json", __dirname);

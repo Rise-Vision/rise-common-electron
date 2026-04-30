@@ -5,7 +5,6 @@ mkdirp = require("mkdirp"),
 os = require("os"),
 fs = require("fs-extra"),
 electronFS = require("fs"),
-rimraf = require("rimraf"),
 gunzip = require("gunzip-maybe"),
 tar = require("tar-fs"),
 ws = require("windows-shortcuts");
@@ -423,7 +422,7 @@ module.exports = {
     });
   },
   callRimraf(path, cb) {
-    rimraf(path, fs, cb);
+    fs.remove(path, cb);
   },
   callMkdirp(path, cb) {
     mkdirp(path, cb);
