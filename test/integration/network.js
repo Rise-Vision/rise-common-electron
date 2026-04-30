@@ -40,7 +40,9 @@ describe("Network", function() {
     simple.mock(global.log, "debug");
 
     return network.downloadFile(`http://localhost:${badPort}/${fileName}`)
-    .then((error)=>{console.log(error)})
+    .then(()=>{
+      assert.fail("expected download to fail but it succeeded");
+    })
     .catch((error)=>{
       assert(error.message.includes("ECONNREFUSED"));
     });
