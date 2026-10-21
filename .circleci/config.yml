@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   "test":
     docker: &DOCKERIMAGE
-      - image: jenkinsrise/cci-latest-node-with-gcloud:0.0.1
+      - image: cimg/node:22.17
     steps:
       - checkout
       - run: node --version && npm --version
