@@ -115,6 +115,12 @@ module.exports = (externalLogger, logFolder, moduleName = "unknownmodule")=> {
 
       if (externalLogger) {externalLogger.log("warning", detail, table, moduleName);}
     },
+    important(detail, table) {
+      debug("IMPORTANT: " + detail);
+      appendToLog(detail);
+
+      if (externalLogger) {externalLogger.log("important", detail, table, moduleName);}
+    },
     all(evt, detail, pct, table) {
       debug(evt, detail ? detail : "");
       appendToLog(detail, evt);

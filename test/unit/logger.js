@@ -154,6 +154,14 @@ describe("launcher", ()=>{
     assert.equal(externalLogger.log.lastCall.args[1], 'test');
   });
 
+  it("properly calls registered loggers on 'important' method", ()=>{
+    log.setUIWindow(uiWindow);
+    log.important("test");
+    assert(externalLogger.log.called);
+    assert.equal(externalLogger.log.lastCall.args[0], 'important');
+    assert.equal(externalLogger.log.lastCall.args[1], 'test');
+  });
+
   it("does not call uiWindow.send if window destroyed", ()=>{
     mock(uiWindow, "isDestroyed").returnWith(true);
     log.setUIWindow(uiWindow);
